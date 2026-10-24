@@ -1,0 +1,14 @@
+.DS_Store
+
+__pycache__/
+
+.ipynb_checkpoints/
+
+*.wav
+*.mp3
+*.env
+*.flac
+*.ogg
+*.m4a
+
+models/

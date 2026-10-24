@@ -1,0 +1,46 @@
+name: interview-sim
+channels:
+  - conda-forge
+dependencies:
+  # conda provides only the interpreter and native tools;
+  # all Python packages come from pip so they are resolved together with torch/whisperx
+  - python=3.12
+  - pip
+  - ffmpeg=7
+  - pip:
+      # speech recognition (whisperx pins torch 2.8 and huggingface-hub < 1.0)
+      - whisperx==3.8.6
+      - faster-whisper==1.2.1
+      - torch==2.8.0
+      - torchaudio==2.8.0
+      - librosa==1.0.0
+
+      # NLP
+      - transformers==4.57.6
+      - sentence-transformers==5.7.0
+      - spacy==3.8.16
+      - preshed==3.0.13
+      - https://github.com/explosion/spacy-models/releases/download/pl_core_news_md-3.8.0/pl_core_news_md-3.8.0-py3-none-any.whl
+      - pystempel==2.0.0
+      - gensim==4.4.0
+      - rapidfuzz==3.14.6
+      - lexicalrichness==0.5.1
+      - ollama==0.6.3
+
+      # data analysis and evaluation
+      - numpy==2.5.4
+      - pandas==3.1.0
+      - matplotlib==3.11.2
+      - scikit-learn==1.9.1
+      - jiwer==4.0.0
+
+      # API
+      - fastapi==0.162.0
+      - uvicorn[standard]==0.54.0
+      - python-multipart==0.0.32
+      - pydantic-settings==2.16.1
+
+      # tooling
+      - jupyterlab==4.6.4
+      - ipykernel==7.4.0
+      - pytest==9.1.1
