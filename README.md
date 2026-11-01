@@ -28,3 +28,17 @@ After `environment.yml` changes, update an existing environment with:
 ```bash
 conda env update -f environment.yml --prune
 ```
+
+Proponowana struktura do nagrywania danych:
+
+data/
+├── questions.csv # lista pytań
+├── recordings.csv # co jest w którym nagraniu
+├── audio/ # nagrania
+│ ├── r001.wav
+│ └── r002.wav
+└── transcripts/ # ręczne transkrypcje wzorcowe
+├── r001.txt
+└── r002.txt
+
+Na ten moment stworzona została lista a folderami i plikami (narazie zostawiłem to puste wszystko)
