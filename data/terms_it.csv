@@ -1,0 +1,51 @@
+term,aliases,category,description
+Jira,dżira|dżiry|dżirze|dżirą|dżirę|jiry|jirze,tool,system do zarządzania zadaniami
+Confluence,konfluens|konfluensa|konfluensie|konfluencji|confluensie,tool,firmowa baza wiedzy i dokumentacji
+GitHub,githab|gitab|githuba|githubie|githubem|gitchab,tool,serwis do hostowania repozytoriów Git
+GitLab,git lab|gitlaba|gitlabie|gitlabem|gitlabu,tool,platforma do repozytoriów i CI/CD
+Jenkins,dżenkins|dżenkinsa|dżenkinsie|dżenkinsem|jenkinsa,tool,serwer automatyzacji buildów
+Slack,slak|slaka|slaku|slacku|slackiem|slakiem,tool,komunikator zespołowy
+Microsoft Teams,timsy|timsach|teamsy|teamsach|teamsie|tims,tool,komunikator i spotkania online
+Postman,postmana|postmanie|postmanem|postmen,tool,narzędzie do testowania API
+Grafana,grafany|grafanie|grafaną|grafanę,tool,wizualizacja metryk i monitoring
+Terraform,teraform|terraforma|terraformie|terraformem|teraforma,tool,infrastruktura jako kod
+Docker,doker|dokera|dokerze|dokerem|dockera|dockerze,technology,konteneryzacja aplikacji
+Kubernetes,kubernetis|kubernetesa|kubernetesie|kubernetesem|kubernetisa|k8s,technology,orkiestracja kontenerów
+Kafka,kafki|kafce|kafkę|kafką|apache kafka,technology,kolejka zdarzeń i strumieni danych
+Redis,ridis|redisa|redisie|redisem|ridisa,technology,baza klucz-wartość w pamięci
+PostgreSQL,postgres|postgresa|postgresie|postgresem|postgre|postgreskjuel,technology,relacyjna baza danych
+Elasticsearch,elastik|elastiksercz|elastica|elasticu|elastiku|elasticsearcha,technology,wyszukiwarka pełnotekstowa
+React,riakt|riakta|riakcie|riaktem|reacta|reactem|reakt,technology,biblioteka do budowy interfejsów
+Angular,angulara|angularze|angularem|engiular|angiular,technology,framework frontendowy
+TypeScript,tajpskrypt|tajpskryptu|tajpskrypcie|tajpskryptem|typescripta|typescriptem,technology,typowany JavaScript
+Node.js,nołd|nołda|nołdzie|noud dżej es|nodejs|nodzie,technology,środowisko uruchomieniowe JavaScript
+Python,pajton|pajtona|pajtonie|pajtonem|pythona|pythonie,technology,język programowania
+Java,dżawa|dżawy|dżawie|dżawą|dżawę|javy|javie,technology,język programowania
+.NET,dot net|dotnet|dotneta|dotnecie|dotnetem,technology,platforma programistyczna Microsoftu
+AWS,ej dablju es|a wu es|awsa|awsie|amazon web services,technology,chmura Amazon
+Azure,ażur|ażura|ażurze|ażurem|azura|azurze,technology,chmura Microsoftu
+Scrum,skram|skrama|skramie|skramem|scruma|scrumie,methodology,zwinna metodyka pracy zespołu
+Kanban,kanbana|kanbanie|kanbanem,methodology,metoda wizualizacji przepływu pracy
+sprint,sprintu|sprincie|sprinty|sprintów|sprintem,methodology,iteracja w Scrumie
+daily,dejli|dejlim|dejlika|dejliku|dejlis,methodology,codzienne krótkie spotkanie zespołu
+backlog,beklog|beklogu|bekloga|backlogu|beklogiem,methodology,lista zadań do zrobienia
+story points,stori pointy|stori pointów|story pointy|story pointów|storypointy,methodology,jednostka szacowania pracochłonności
+pull request,pul rikłest|pul rekłest|pull requesta|pull requeście|pull requesty|pi ar,concept,prośba o włączenie zmian do kodu
+code review,kod riwju|kod rewju|kod riwiu|code review'u|kodrewju,concept,przegląd kodu przez innych programistów
+merge,merdż|merdża|merdżu|merdżem|zmerdżować|mergować,concept,scalenie gałęzi kodu
+deploy,diploj|deploj|deploju|deployu|deplojem|deplojment|deployment,concept,wdrożenie aplikacji
+commit,komit|komita|komitem|komity|komitów|commita,concept,zapis zmian w repozytorium
+branch,brancz|brancza|branczu|branczem|branchu|branche,concept,gałąź w repozytorium
+refactoring,refaktoring|refaktoringu|refaktor|refaktorem|refactor,concept,poprawa struktury kodu bez zmiany działania
+unit test,juni test|juni testy|juni testów|unit testy|unit testów|unittesty,concept,test pojedynczej funkcji lub klasy
+feature flag,ficzer flag|ficzer flagi|ficzerflag|feature flagi|feature flagę,concept,przełącznik włączający funkcję
+rollback,rolbek|rolbeka|rolbak|rollbacku|rolbeku,concept,wycofanie wdrożenia
+hotfix,hotfiks|hotfiksa|hotfiksem|hotfixa|hotfiksy,concept,pilna poprawka na produkcji
+CI/CD,si aj si di|ci cd|cicd|ci/cd|si aj,acronym,ciągła integracja i ciągłe wdrażanie
+POC,pi ou si|pok|poka|poca|pokiem,acronym,proof of concept - prototyp sprawdzający pomysł
+MVP,em wi pi|emwipi|mvp,acronym,minimum viable product - minimalna wersja produktu
+API,ej pi aj|ejpiaj|apika|apiki|apików,acronym,interfejs programistyczny
+REST,rest|resta|restowe|restowego|restowym,acronym,styl architektury API
+SQL,es kju el|eskjuel|sequel|sikłel|eskuel,acronym,język zapytań do baz danych
+DevOps,dewops|dewopsa|dewopsem|devopsa|devopsie,acronym,łączenie developmentu i utrzymania
+QA,kju ej|kjuej|qa,acronym,zapewnienie jakości i testy
