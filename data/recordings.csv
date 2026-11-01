@@ -1,1 +1,1 @@
-file,question_id,speaker,intended_style,intended_fluency,label_style,label_fluency,duration_s,recorded_at,notes
+file,question_id,speaker,variant,intended_style,intended_fluency,intended_content,label_style,label_fluency,label_content,duration_s,recorded_at,notes
