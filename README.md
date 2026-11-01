@@ -207,8 +207,3 @@ Writing rules:
 - **Write technical terms in their correct form** (`Jira`, `PoC`, `JSON`), even if they were pronounced colloquially, because that is the target of the correction.
 - Write numbers as words, the way they were spoken.
 - No pause markers. Pauses are computed from timestamps.
-
-## 8. Privacy
-
-- If you record other people, ask for their consent to use the recordings in the project.
-- Recordings are not committed to the repository (`.gitignore` excludes `*.wav` and `*.m4a`).
