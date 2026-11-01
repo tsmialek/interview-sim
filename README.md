@@ -28,3 +28,51 @@ After `environment.yml` changes, update an existing environment with:
 ```bash
 conda env update -f environment.yml --prune
 ```
+
+## Data
+
+Recordings and annotations are versioned with [DVC](https://dvc.org/) and stored in a private Google Drive folder. Git keeps only the small `.dvc` pointer files. Recordings are personal data, so never commit them to Git.
+
+### DVC setup
+
+The remote is already defined in `.dvc/config`. You only need access to the Drive folder and the OAuth client secret, which you get from a project member outside the repository. Your Google account must also be added as a test user of the OAuth app.
+
+Save the secret in `.dvc/config.local`, which is ignored by Git:
+
+```bash
+dvc remote modify --local gdrive gdrive_client_secret <CLIENT_SECRET>
+```
+
+Never put the secret in `.dvc/config`.
+
+Download the data (on first use a browser window opens for Google sign-in):
+
+```bash
+dvc pull
+```
+
+### Adding or changing data
+
+```bash
+# start tracking a folder, or record changes in it
+dvc add data/audio
+
+# commit the pointer file
+git add data/audio.dvc data/.gitignore
+git commit -m "Update audio data"
+
+# upload the data, then share the pointer
+dvc push
+git push
+```
+
+After someone else changes the data, run `git pull` and then `dvc pull`.
+
+### Handling DVC conflicts
+
+```bash
+git config merge.dvc.name 'DVC merge driver'
+git config merge.dvc.driver 'dvc git-hook merge-driver --ancestor %O --our %A --their %B'
+```
+
+This handles adding new files to the same folder on different branches. It does not resolve simultaneous changes to the same file.

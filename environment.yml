@@ -44,3 +44,5 @@ dependencies:
       - jupyterlab==4.6.4
       - ipykernel==7.4.0
       - pytest==9.1.1
+      - dvc[gdrive]==3.67.1
+      - pyOpenSSL==24.2.1
