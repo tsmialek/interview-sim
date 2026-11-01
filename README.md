@@ -41,8 +41,6 @@ data/
 ├── r001.txt
 └── r002.txt
 
-Na ten moment stworzona została lista a folderami i plikami (dodałem 20 przykładowych pytań)
-
 # Recording Guidelines
 
 The recordings dataset is used to test transcription, correction of domain-specific terms, and the assessment of style, fluency and content. Questions are in `data/questions.csv`, recording metadata in `data/recordings.csv`.
@@ -51,8 +49,6 @@ Recordings are in **Polish**, so the examples of colloquial words and fillers be
 
 ## 1. Equipment and conditions
 
-- A phone or a laptop microphone is enough. Keep it 20–30 cm from your mouth, always at a similar distance.
-- Quiet room, no music or TV in the background.
 - Do **not** use filters, noise reduction or "voice enhancement" in the recording app.
 - Target format: **WAV, 16 kHz, mono**. Convert phone recordings (`.m4a`) with:
 
@@ -216,12 +212,3 @@ Writing rules:
 
 - If you record other people, ask for their consent to use the recordings in the project.
 - Recordings are not committed to the repository (`.gitignore` excludes `*.wav` and `*.m4a`).
-
-## Checklist for one recording
-
-- [ ] quiet, no filters, 20–30 cm from the microphone
-- [ ] 45–120 s, spoken freely
-- [ ] file `qXX_V_speaker.wav` (16 kHz, mono) in `data/audio/`
-- [ ] a row in `recordings.csv` (`intended_*` columns)
-- [ ] transcript in `data/transcripts/`
-- [ ] `label_*` labels after listening
