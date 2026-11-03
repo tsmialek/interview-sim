@@ -50,3 +50,17 @@ SQL,es kju el|eskjuel|sequel|sikłel|eskuel,acronym,język zapytań do baz danyc
 DevOps,dewops|dewopsa|dewopsem|devopsa|devopsie,acronym,łączenie developmentu i utrzymania
 QA,kju ej|kjuej|qa,acronym,zapewnienie jakości i testy
 e-commerce,ikomers|ikomersu|ikomersie|ikomersowy|ikomersowego|e-commerce'owy|e-commerce'owego,concept,handel internetowy
+C#,si szarp|si szarpa|si szarpie|ci szarp|ci szarpie|csiarp|csiarpie|c sharp,technology,język programowania Microsoftu
+Entity Framework,entiti frejmłork|entiti fremłork|entity frejmłork|entity frameworka|entityframework,technology,ORM do baz danych w .NET
+ClickUp,klikap|klikapa|klikapie|klikapem|clickupa|clickupie,tool,narzędzie do zarządzania zadaniami
+Hangfire,hengfajer|hengfajera|hengfajerze|hengfajerem|hangfajer|hangfire'a,technology,biblioteka do zadań w tle w .NET
+Railway,reilłej|reilłeja|reilłeju|reilłejem|rejlłej|rejlłeju|railwayu|railwayem,tool,platforma hostingowa do wdrażania aplikacji
+pgvector,pi dżi wektor|pi dżi wektora|pi dżi wektorze|pgwektor|pgvectora|pgvektor,technology,rozszerzenie PostgreSQL do wektorów
+staging,stejdżing|stejdżingu|stejdżingiem|stejdżyng|stagingu|stagingiem,concept,środowisko testowe przed produkcją
+frontend,front end|front-end|frontendu|frontendzie|frontendem,concept,warstwa interfejsu użytkownika
+backend,bekend|bekendu|bekendzie|backendu|backendzie|back end,concept,warstwa serwerowa aplikacji
+embedding,embeding|embedingi|embedingów|embeddingi|embeddingów,concept,wektorowa reprezentacja tekstu
+cache,kesz|keszu|keszowanie|keszowania|cache'owanie,concept,pamięć podręczna na często używane dane
+blocker,bloker|blokery|blokerów|blokerem,concept,przeszkoda blokująca postęp zadania
+framework,frejmłork|frejmłorku|frejmłorka|frejmłorki|frejmłorkiem|fremłork|frejmwork|frameworku|frameworka|frameworki,concept,zestaw narzędzi programistycznych
+cache,kesz|keszu|keszowanie|keszowania|cache'owanie,concept,pamięć podręczna na często używane dane
