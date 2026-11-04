@@ -1,0 +1,95 @@
+term,aliases,category,description
+Jira,dżira|dżiry|dżirze|dżirą|dżirę|jiry|jirze,tool,system do zarządzania zadaniami
+Confluence,konfluens|konfluensa|konfluensie|konfluencji|confluensie,tool,firmowa baza wiedzy i dokumentacji
+GitHub,githab|gitab|githuba|githubie|githubem|gitchab,tool,serwis do hostowania repozytoriów Git
+GitLab,git lab|gitlaba|gitlabie|gitlabem|gitlabu,tool,platforma do repozytoriów i CI/CD
+Jenkins,dżenkins|dżenkinsa|dżenkinsie|dżenkinsem|jenkinsa,tool,serwer automatyzacji buildów
+Slack,slak|slaka|slaku|slacku|slackiem|slakiem,tool,komunikator zespołowy
+Microsoft Teams,timsy|timsach|teamsy|teamsach|teamsie|tims|timsa|teamsa,tool,komunikator i spotkania online
+Postman,postmana|postmanie|postmanem|postmen,tool,narzędzie do testowania API
+Grafana,grafany|grafanie|grafaną|grafanę,tool,wizualizacja metryk i monitoring
+Terraform,teraform|terraforma|terraformie|terraformem|teraforma,tool,infrastruktura jako kod
+Docker,doker|dokera|dokerze|dokerem|dockera|dockerze,technology,konteneryzacja aplikacji
+Kubernetes,kubernetis|kubernetesa|kubernetesie|kubernetesem|kubernetisa|k8s,technology,orkiestracja kontenerów
+Kafka,kafki|kafce|kafkę|kafką|apache kafka,technology,kolejka zdarzeń i strumieni danych
+Redis,ridis|redisa|redisie|redisem|ridisa,technology,baza klucz-wartość w pamięci
+PostgreSQL,postgres|postgresa|postgresie|postgresem|postgre|postgreskjuel,technology,relacyjna baza danych
+Elasticsearch,elastik|elastiksercz|elastica|elasticu|elastiku|elasticsearcha,technology,wyszukiwarka pełnotekstowa
+React,riakt|riakta|riakcie|riaktem|reacta|reactem|reakt,technology,biblioteka do budowy interfejsów
+Angular,angulara|angularze|angularem|engiular|angiular,technology,framework frontendowy
+TypeScript,tajpskrypt|tajpskryptu|tajpskrypcie|tajpskryptem|typescripta|typescriptem,technology,typowany JavaScript
+Node.js,nołd|nołda|nołdzie|noud dżej es|nodejs|nodzie,technology,środowisko uruchomieniowe JavaScript
+Python,pajton|pajtona|pajtonie|pajtonem|pythona|pythonie,technology,język programowania
+Java,dżawa|dżawy|dżawie|dżawą|dżawę|javy|javie,technology,język programowania
+.NET,dot net|dotnet|dotneta|dotnecie|dotnetem,technology,platforma programistyczna Microsoftu
+AWS,ej dablju es|a wu es|awsa|awsie|amazon web services|amazon łeb serwises|amazon łeb services,technology,chmura Amazon
+Azure,ażur|ażura|ażurze|ażurem|azura|azurze,technology,chmura Microsoftu
+Scrum,skram|skrama|skramie|skramem|scruma|scrumie,methodology,zwinna metodyka pracy zespołu
+Kanban,kanbana|kanbanie|kanbanem,methodology,metoda wizualizacji przepływu pracy
+sprint,sprintu|sprincie|sprinty|sprintów|sprintem,methodology,iteracja w Scrumie
+daily,dejli|dejlim|dejlika|dejliku|dejlis,methodology,codzienne krótkie spotkanie zespołu
+backlog,beklog|beklogu|bekloga|backlogu|beklogiem,methodology,lista zadań do zrobienia
+story points,stori pointy|stori pointów|story pointy|story pointów|storypointy,methodology,jednostka szacowania pracochłonności
+pull request,pul rikłest|pul rekłest|pull requesta|pull requeście|pull requesty|pi ar,concept,prośba o włączenie zmian do kodu
+code review,kod riwju|kod rewju|kod riwiu|code review'u|kodrewju,concept,przegląd kodu przez innych programistów
+merge,merdż|merdża|merdżu|merdżem|zmerdżować|mergować|merdżowane|mergowane,concept,scalenie gałęzi kodu
+deploy,diploj|deploj|deploju|deployu|deplojem|deplojment|deployment,concept,wdrożenie aplikacji
+commit,komit|komita|komitem|komity|komitów|commita,concept,zapis zmian w repozytorium
+branch,brancz|brancza|branczu|branczem|branchu|branche,concept,gałąź w repozytorium
+refactoring,refaktoring|refaktoringu|refaktor|refaktorem|refactor,concept,poprawa struktury kodu bez zmiany działania
+unit test,juni test|juni testy|juni testów|unit testy|unit testów|unittesty,concept,test pojedynczej funkcji lub klasy
+feature flag,ficzer flag|ficzer flagi|ficzerflag|feature flagi|feature flagę,concept,przełącznik włączający funkcję
+rollback,rolbek|rolbeka|rolbak|rollbacku|rolbeku,concept,wycofanie wdrożenia
+hotfix,hotfiks|hotfiksa|hotfiksem|hotfixa|hotfiksy,concept,pilna poprawka na produkcji
+CI/CD,si aj si di|ci cd|cicd|ci/cd|si aj,acronym,ciągła integracja i ciągłe wdrażanie
+POC,pi ou si|pok|poka|poca|pokiem,acronym,proof of concept - prototyp sprawdzający pomysł
+MVP,em wi pi|emwipi|mvp,acronym,minimum viable product - minimalna wersja produktu
+API,ej pi aj|ejpiaj|apika|apiki|apików,acronym,interfejs programistyczny
+REST,rest|resta|restowe|restowego|restowym,acronym,styl architektury API
+SQL,es kju el|eskjuel|sequel|sikłel|eskuel,acronym,język zapytań do baz danych
+DevOps,dewops|dewopsa|dewopsem|devopsa|devopsie,acronym,łączenie developmentu i utrzymania
+QA,kju ej|kjuej|qa,acronym,zapewnienie jakości i testy
+e-commerce,ikomers|ikomersu|ikomersie|ikomersowy|ikomersowego|e-commerce'owy|e-commerce'owego,concept,handel internetowy
+C#,si szarp|si szarpa|si szarpie|ci szarp|ci szarpie|csiarp|csiarpie|c sharp|siszarp|si szarpem|siszarpie,technology,język programowania Microsoftu
+Entity Framework,entiti frejmłork|entiti fremłork|entity frejmłork|entity frameworka|entityframework,technology,ORM do baz danych w .NET
+ClickUp,klikap|klikapa|klikapie|klikapem|clickupa|clickupie,tool,narzędzie do zarządzania zadaniami
+Hangfire,hengfajer|hengfajera|hengfajerze|hengfajerem|hangfajer|hangfire'a|hagfajer|hangfire|hangfajerem|hangfajera|hagfajera,technology,biblioteka .NET do zadań w tle
+Railway,reilłej|reilłeja|reilłeju|reilłejem|rejlłej|rejlłeju|railwayu|railwayem|reilwej|railwaj|railwaju|reilweju,technology,platforma do hostowania aplikacji
+pgvector,pi dżi wektor|pi dżi wektora|pi dżi wektorze|pgwektor|pgvectora|pgvektor|pidżi wektor|pidżi wektorze|pegie wektor|pegiewektor,technology,rozszerzenie PostgreSQL do wyszukiwania wektorowego
+staging,stejdżing|stejdżingu|stejdżingiem|stejdżyng|stagingu|stagingiem,concept,środowisko testowe przed produkcją
+frontend,front end|front-end|frontendu|frontendzie|frontendem|frontend|frontent,concept,warstwa aplikacji widoczna dla użytkownika
+backend,bekend|bekendu|bekendzie|backendu|backendzie|back end|bakend|bakendem|bakendowi,concept,serwerowa warstwa aplikacji
+embedding,embeding|embedingi|embedingów|embeddingi|embeddingów,concept,wektorowa reprezentacja tekstu
+cache,kesz|keszu|keszowanie|keszowania|cache'owanie,concept,pamięć podręczna na często używane dane
+blocker,bloker|blokery|blokerów|blokerem,concept,przeszkoda blokująca postęp zadania
+framework,frejmłork|frejmłorku|frejmłorka|frejmłorki|frejmłorkiem|fremłork|frejmwork|frameworku|frameworka|frameworki|frejmworka,concept,szkielet do budowy aplikacji
+JavaScript,dżawaskript|dżawa skript|dżawa skriptem|dżawa skripcie|dżawaskripcie,technology,język programowania stron i aplikacji webowych
+Next.js,nekstdżejes|nextdżejesem|next dżejesie,technology,framework Reacta do aplikacji webowych
+Tcl,teceel|te ce el|te ce elem,technology,skryptowy język programowania
+Vercel,wercel|wercelem|wercelowi|wercelu,technology,platforma do hostowania frontendu
+Firebase,fajerbejs|fajer bejs|fajerbejsem|fajerbejsa,technology,platforma backendowa Google
+PocketBase,poket bejs|poketbejs|poketbejsem|poketbejsa,technology,backend w jednym pliku do self-hostingu
+EC2,ecedwa|e ce dwa|e ce dwójce|ece dwójce|ece dwójki|ece dwójkom,technology,wirtualne serwery w chmurze AWS
+Cloud Functions,klałd fankszyns|kloud funkszyns|klałd funkszions,technology,funkcje serverless w chmurze Google
+Microsoft,majkrosoft|majkrosoftu|majkrosoftem|majkrosoftowi,technology,firma i ekosystem narzędzi Microsoftu
+Outlook,ołtluk|outluk|outluka|ołtluku|outlukiem|ołtlukiem|ałtluk,tool,poczta i kalendarz Microsoftu
+VS Code,wieskołd|wi es kod,tool,edytor kodu Microsoftu
+GitHub Copilot,kopajlotem|kopajlot|kopajlotowi,tool,asystent AI do pisania kodu
+Vocare,wokare,tool,platforma doradztwa zawodowego wspierana AI
+plugin,plagin|plugin|pluginowi|plaginu|plaginem,concept,wtyczka rozszerzająca program
+stack,stak|stakiem|stakowi|staku,concept,zestaw technologii używanych w projekcie
+request,rikłest|rikłesty|rikłestować|request,concept,żądanie wysyłane do serwera lub API
+feature,ficzer|ficzery,concept,nowa funkcjonalność aplikacji
+fix,fiks|fiksem|fixować|fiksowi,concept,poprawka błędu w kodzie
+merge request,merdż rikłest|merdż rikłestowi|merdż rikłeście|merdż request,concept,prośba o włączenie zmian do kodu w GitLabie
+develop,dewelop|develop|dewelopie|dewelopem,concept,gałąź integracyjna w repozytorium
+support,saport|suport|saportem|suportowi|saportowych,concept,gałąź utrzymaniowa starszej wersji systemu
+hosting,hostować|hosting|hostuje,concept,utrzymywanie aplikacji na serwerze
+self-hosting,self hosting|self hostować|self hostowany,concept,hostowanie usługi na własnym serwerze
+serverless,serwerlesowym|serwerles|serwerlesowy,concept,model chmury bez zarządzania serwerami
+microservice,mikroserwis|mikro serwis|mikroserwisowe|mikroserwisy|mikroserwisów,concept,mała niezależna usługa w architekturze mikroserwisów
+AI,ejaj|ej aj,acronym,artificial intelligence - sztuczna inteligencja
+LLM,elelemów|el el emów|elelem|ele lem,acronym,large language model - duży model językowy
+RAG,rag|ragowego|ragowym|ragowych,acronym,retrieval-augmented generation - generowanie wspierane wyszukiwaniem
+IDE,ide|aj di i|ajdii,acronym,zintegrowane środowisko programistyczne
+LTS,el te es|elteesem|eltees|eltesowe,acronym,long-term support - wersja z wydłużonym wsparciem
