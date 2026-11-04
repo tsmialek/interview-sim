@@ -3,9 +3,14 @@ rec_201,KJ,positive,3,casual,laptop,quiet,dev
 rec_202,KJ,positive,6,casual,laptop,quiet,test
 rec_203,KJ,positive,9,casual,laptop,quiet,dev
 rec_204,KJ,positive,12,casual,laptop,quiet,test
-rec_205,KJ,negative,N3,casual,laptop,quiet,dev
+rec_205,KJ,negative,N3,casual,laptop,quiet,test
 rec_101,BK,positive,2,casual,phone,quiet,dev
 rec_102,BK,positive,5,casual,phone,quiet,test
 rec_103,BK,positive,8,casual,phone,quiet,dev
 rec_104,BK,positive,11,casual,phone,quiet,test
-rec_105,BK,negative,0,casual,phone,noisy,dev
+rec_105,BK,negative,0,casual,phone,noisy,test
+rec_001,TS,positive,1,casual,laptop,quiet,dev
+rec_002,TS,positive,4,casual,laptop,quiet,test
+rec_003,TS,positive,7,casual,phone,quiet,dev
+rec_004,TS,positive,10,casual,laptop,quiet,test
+rec_005,TS,negative,N1,casual,phone,quiet,dev
