@@ -1,0 +1,6 @@
+file_id,speaker,sample_type,question_id,style,device,environment,split
+rec_201,KJ,positive,3,casual,laptop,quiet,dev
+rec_202,KJ,positive,6,casual,laptop,quiet,test
+rec_203,KJ,positive,9,casual,laptop,quiet,dev
+rec_204,KJ,positive,12,casual,laptop,quiet,test
+rec_205,KJ,negative,N3,casual,laptop,quiet,dev
