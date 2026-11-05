@@ -1,0 +1,23 @@
+#!/bin/sh
+# Validate the dataset before a commit that touches data/.
+# Enable once per clone: git config core.hooksPath .githooks
+
+staged=$(git diff --cached --name-only --diff-filter=ACMRD -- data/)
+[ -z "$staged" ] && exit 0
+
+# audio is checked only when its DVC pointer changes, so commits without `dvc pull` are not blocked
+args="--skip-audio"
+echo "$staged" | grep -qx 'data/audio.dvc' && args=""
+
+python=$(command -v python3 || command -v python)
+if [ -z "$python" ]; then
+    echo "pre-commit: Python not found, skipping data validation" >&2
+    exit 0
+fi
+
+# stderr, so editors like VS Code show the report in the failed-commit dialog
+if ! "$python" src/validate_data.py $args >&2; then
+    echo >&2
+    echo "Commit blocked: fix the errors above, or skip the check with: git commit --no-verify" >&2
+    exit 1
+fi
