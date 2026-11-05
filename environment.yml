@@ -14,6 +14,7 @@ dependencies:
       - torch==2.8.0
       - torchaudio==2.8.0
       - librosa==1.0.0
+      - av<19.0.0
 
       # NLP
       - transformers==4.57.6
