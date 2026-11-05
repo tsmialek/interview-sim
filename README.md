@@ -19,6 +19,9 @@ conda activate interview-sim
 
 # register the kernel (for Jupyter Notebook)
 python -m ipykernel install --user --name interview-sim
+
+# enable the project git hooks (data validation before commit)
+git config core.hooksPath .githooks
 ```
 
 The Polish `spaCy` model (`pl_core_news_md`) is installed together with the environment.
@@ -67,6 +70,19 @@ git push
 ```
 
 After someone else changes the data, run `git pull` and then `dvc pull`.
+
+### Validating data
+
+Run the validator after adding or editing recordings, transcripts, `recordings.csv` or `terms_it.csv`:
+
+```bash
+python src/validate_data.py               # full check
+python src/validate_data.py --skip-audio  # without data/audio, e.g. before dvc pull
+```
+
+It checks that every recording has a transcript and a manifest row, that terms in `{form|term}` exist in the dictionary, that fillers are only `yyy` / `eee` / `mmm`, and that audio is 16 kHz mono 16-bit WAV. Errors make it exit with code 1, warnings (duration outside 45–90 s, digits, a dictionary term without braces) are for review.
+
+With the hooks enabled (see [Setup](#setup)), it also runs automatically before every commit that touches `data/`. The hook blocks the commit when there are errors and prints the report (in VS Code: the error dialog, or Output → Git). Audio is checked only when `data/audio.dvc` is staged. To commit anyway, use `git commit --no-verify`.
 
 ### Handling DVC conflicts
 

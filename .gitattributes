@@ -1,1 +1,2 @@
 *.dvc merge=dvc
+.githooks/* text eol=lf
