@@ -64,7 +64,7 @@ dvc add data/audio
 git add data/audio.dvc data/.gitignore
 git commit -m "Update audio data"
 
-# upload the data, then share the pointer
+# upload the data and then share the pointer
 dvc push
 git push
 ```
