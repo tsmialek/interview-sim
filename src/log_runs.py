@@ -66,7 +66,7 @@ class WhisperConfig():
 
     def get_transcribe_args(self) -> Dict[str, Any]:
         args: Dict[str, Any] = {}
-        for field, value in self.__dict__:
+        for field, value in self.__dict__.items():
             if field in ["model", "device", "compute_type", "hotwords_source"] or value is None:
                 continue
             elif field == "hotwords" and isinstance(value, List):
