@@ -11,8 +11,8 @@ from abc import ABC, abstractmethod
 
 from faster_whisper.transcribe import Word
 
-from constants import DICTIONARY_PATH, RUNS_DIR
-from utils import get_last_commit_hash, get_project_environment, is_worktree_dirty
+from constants import PROJECT_DIR, RUNS_DIR
+from utils import get_git_info, get_project_environment
 
 
 @dataclass
@@ -22,11 +22,11 @@ class Run():
     source_run_id: str
     split: str
     rec_ids: List[str]
-    started_at: datetime
-    finished_at: datetime
+    started_at: str
+    finished_at: str
     duration_s: float
     status: str
-    error: Exception | None
+    error: str | None
     git_commit: str
     git_dirty: bool
     packages: Dict[str, str]
@@ -69,7 +69,7 @@ class WhisperConfig():
         for field, value in self.__dict__.items():
             if field in ["model", "device", "compute_type", "hotwords_source"] or value is None:
                 continue
-            elif field == "hotwords" and isinstance(value, List):
+            elif field == "hotwords" and isinstance(value, list):
                 args[field] = " ".join(value)
             else:
                 args[field] = value
@@ -140,7 +140,7 @@ class RunsLogger(ABC):
         pass
 
     @abstractmethod
-    def save_code_patch(self, run_id: str, rec_id: str, diff: str) -> None:
+    def save_code_patch(self, run_id: str, diff: str) -> None:
         pass
 
 
@@ -154,22 +154,29 @@ class ActiveRun:
 
         self.start_time: float = 0.0
         self.end_time: float = 0.0
-        self.error: Exception | None = None
+
+        self.error: str | None = None
         self.status: str | None = None
-        self.rec_ids: List[str]
+        self.rec_ids: List[str] = []
+        self.commit: str = ""
+        self.git_dirty: bool = False
+        self.project_env: Dict[str, str] = {}
 
     def __enter__(self) -> Self:
+        self.started = datetime.now(tz=timezone.utc)
+
         self.start_time = time.perf_counter()
+        self.commit = get_git_info("commit", PROJECT_DIR)
+        self.git_dirty = True if get_git_info(
+            "files_changed", PROJECT_DIR) else False
+        self.project_env = get_project_environment()
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
+        self.finished = datetime.now(tz=timezone.utc)
         self.end_time = time.perf_counter()
         self.status = "failed" if exc_type else "ok"
-        self.error = exc
-
-        commit = get_last_commit_hash()
-        git_dirty = is_worktree_dirty()
-        project_env = get_project_environment()
+        self.error = repr(exc) if exc else None
 
         run = Run(
             self.run_id,
@@ -177,14 +184,14 @@ class ActiveRun:
             self.source_run_id,
             self.split,
             self.rec_ids,
-            datetime.fromtimestamp(self.start_time),
-            datetime.fromtimestamp(self.end_time),
-            self.end_time - self.end_time,
+            self.started.isoformat(),
+            self.finished.isoformat(),
+            self.end_time - self.start_time,
             self.status,
             self.error,
-            commit,
-            git_dirty,
-            project_env
+            self.commit,
+            self.git_dirty,
+            self.project_env
         )
         self.logger.save_run(run)
         return False
@@ -194,7 +201,7 @@ class ActiveRun:
         self.logger.save_artifact(self.run_id, artifact)
 
     def get_artifact(self, rec_id: str) -> RunArtifact:
-        return self.logger.get_artifact(rec_id, self.run_id)
+        return self.logger.get_artifact(self.run_id, rec_id)
 
 
 class FileLogger(RunsLogger):
@@ -210,3 +217,24 @@ class FileLogger(RunsLogger):
         chars = string.ascii_letters + string.digits
         random_chars = "".join(random.choices(chars, k=4))
         return f"{now.year}{now.month:02d}{now.day:02d}-{now.hour:02d}{now.minute:02d}-{random_chars}"
+
+    def save_config(self, run_confg: RunConfig) -> str:
+        raise NotImplementedError
+
+    def get_config(self, config_id: str) -> RunConfig:
+        raise NotImplementedError
+
+    def start_run(self, config: RunConfig, split: str, source_run_id: str) -> ActiveRun:
+        raise NotImplementedError
+
+    def save_artifact(self, run_id: str, run_artifact: RunArtifact) -> None:
+        raise NotImplementedError
+
+    def get_artifact(self, run_id: str, rec_id: str) -> RunArtifact:
+        raise NotImplementedError
+
+    def save_run(self, run: Run) -> None:
+        raise NotImplementedError
+
+    def save_code_patch(self, run_id: str, diff: str) -> None:
+        raise NotImplementedError

@@ -1,5 +1,9 @@
 import pytest
 from dataclasses import replace
+import random
+from unittest.mock import patch
+from datetime import datetime, timezone
+from log_runs import FileLogger
 
 
 def test_get_transcribe_args_excludes_internal_fields(default_whisper_config):
@@ -33,3 +37,13 @@ def test_get_transcribe_args_formats_hotwords_correctly(
     args = cfg.get_transcribe_args()
 
     assert args["hotwords"] == expected_output
+
+
+@patch("log_runs.datetime")
+def test_new_run_id_returns_proper_run_id(mock_datetime, tmp_path):
+    mock_datetime.now.return_value = datetime(
+        2026, 1, 15, 12, 0, tzinfo=timezone.utc)
+    random.seed(42)
+
+    logger = FileLogger(tmp_path)
+    assert logger._new_run_id() == "20260115-1200-Nbrn"

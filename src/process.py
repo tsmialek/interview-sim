@@ -11,8 +11,15 @@ def transcribe(whisper_model: WhisperModel, whisper_conf: WhisperConfig, audio_p
     )
 
     rec_id = Path(audio_path).stem
-    words = [w for seg in segments for w in seg.words or []]
-    whisper_text = " ".join([seg.text.strip() for seg in segments])
+
+    words = []
+    text_parts = []
+    for seg in segments:
+        text_parts.append(seg.text.strip())
+        if seg.words:
+            words.extend(seg.words)
+
+    whisper_text = " ".join(text_parts)
     final_text = normalize_transcript(whisper_text)
 
     return TranscribeArtifact(
