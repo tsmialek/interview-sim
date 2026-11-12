@@ -40,6 +40,7 @@ dependencies:
       - uvicorn[standard]==0.54.0
       - python-multipart==0.0.32
       - pydantic-settings==2.16.1
+      - pydantic==2.14.1
 
       # tooling
       - jupyterlab==4.6.4

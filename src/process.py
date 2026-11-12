@@ -23,10 +23,10 @@ def transcribe(whisper_model: WhisperModel, whisper_conf: WhisperConfig, audio_p
     final_text = normalize_transcript(whisper_text)
 
     return TranscribeArtifact(
-        rec_id,
-        final_text,
-        whisper_text,
-        words
+        rec_id=rec_id,
+        final_text=final_text,
+        whisper_text=whisper_text,
+        words=words
     )
 
 

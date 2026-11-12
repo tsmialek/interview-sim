@@ -1,25 +1,27 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
-from typing import List, Tuple, Union, Self, Dict, Any
+from pydantic import BaseModel
+from typing import List, Tuple, Union, Self, Dict, Any, Literal
 from datetime import datetime, timezone
 import random
 import string
 from pathlib import Path
 from abc import ABC, abstractmethod
+import json
+import csv
 
 from faster_whisper.transcribe import Word
+import pandas as pd
 
 from constants import PROJECT_DIR, RUNS_DIR
-from utils import get_git_info, get_project_environment
+from utils import get_git_changed_files, get_current_diffs, get_last_commit, get_project_environment, get_sha256
 
 
-@dataclass
-class Run():
+class Run(BaseModel):
     run_id: str
     config_id: str
-    source_run_id: str
+    source_run_id: str | None
     split: str
     rec_ids: List[str]
     started_at: str
@@ -32,23 +34,20 @@ class Run():
     packages: Dict[str, str]
 
 
-@dataclass
-class SlmConfig():
+class SlmConfig(BaseModel):
     model: str
     digest: str
     prompt_sha: str
     temperature: float
 
 
-@dataclass
-class DictionaryConfig():
+class DictionaryConfig(BaseModel):
     terms_sha: str
     hidden_terms_sha: str
     rapidfuzz_threshold: float
 
 
-@dataclass
-class WhisperConfig():
+class WhisperConfig(BaseModel):
     model: str
     device: str
     compute_type: str
@@ -66,18 +65,17 @@ class WhisperConfig():
 
     def get_transcribe_args(self) -> Dict[str, Any]:
         args: Dict[str, Any] = {}
-        for field, value in self.__dict__.items():
-            if field in ["model", "device", "compute_type", "hotwords_source"] or value is None:
-                continue
-            elif field == "hotwords" and isinstance(value, list):
+        for field, value in self.model_dump(
+                exclude={"model", "device", "compute_type", "hotwords_source"},
+                exclude_none=True).items():
+            if field == "hotwords" and isinstance(value, list):
                 args[field] = " ".join(value)
             else:
                 args[field] = value
         return args
 
 
-@dataclass
-class RunConfig():
+class RunConfig(BaseModel):
     config_id: str
     variant: int
     parent_config_id: str | None
@@ -87,8 +85,7 @@ class RunConfig():
     slm: SlmConfig | None
 
 
-@dataclass
-class Replacement():
+class Replacement(BaseModel):
     r_from: str
     r_to: str
     base_term: str
@@ -96,20 +93,19 @@ class Replacement():
     source: str
 
 
-@dataclass
-class RunArtifact():
+class RunArtifact(BaseModel):
     rec_id: str
     final_text: str
 
 
-@dataclass
 class TranscribeArtifact(RunArtifact):
+    kind: Literal["transcribe"] = "transcribe"
     whisper_text: str
     words: List[Word]
 
 
-@dataclass
 class ReplaceArtifact(RunArtifact):
+    kind: Literal["replace"] = "replace"
     replacements: List[Replacement]
     rejected: List[Replacement]
 
@@ -140,6 +136,10 @@ class RunsLogger(ABC):
         pass
 
     @abstractmethod
+    def save_results(self) -> None:
+        pass
+
+    @abstractmethod
     def save_code_patch(self, run_id: str, diff: str) -> None:
         pass
 
@@ -161,14 +161,15 @@ class ActiveRun:
         self.commit: str = ""
         self.git_dirty: bool = False
         self.project_env: Dict[str, str] = {}
+        self.started = datetime.now(tz=timezone.utc)
+        self.finished = datetime.now(tz=timezone.utc)
 
     def __enter__(self) -> Self:
         self.started = datetime.now(tz=timezone.utc)
-
         self.start_time = time.perf_counter()
-        self.commit = get_git_info("commit", PROJECT_DIR)
-        self.git_dirty = True if get_git_info(
-            "files_changed", PROJECT_DIR) else False
+
+        self.commit = get_last_commit(PROJECT_DIR)
+        self.git_dirty = True if get_git_changed_files(PROJECT_DIR) else False
         self.project_env = get_project_environment()
         return self
 
@@ -179,19 +180,19 @@ class ActiveRun:
         self.error = repr(exc) if exc else None
 
         run = Run(
-            self.run_id,
-            self.config_id,
-            self.source_run_id,
-            self.split,
-            self.rec_ids,
-            self.started.isoformat(),
-            self.finished.isoformat(),
-            self.end_time - self.start_time,
-            self.status,
-            self.error,
-            self.commit,
-            self.git_dirty,
-            self.project_env
+            run_id=self.run_id,
+            config_id=self.config_id,
+            source_run_id=self.source_run_id,
+            split=self.split,
+            rec_ids=self.rec_ids,
+            started_at=self.started.isoformat(),
+            finished_at=self.finished.isoformat(),
+            duration_s=self.end_time - self.start_time,
+            status=self.status,
+            error=self.error,
+            git_commit=self.commit,
+            git_dirty=self.git_dirty,
+            packages=self.project_env
         )
         self.logger.save_run(run)
         return False
@@ -205,12 +206,15 @@ class ActiveRun:
 
 
 class FileLogger(RunsLogger):
-    def __init__(self, runs_path: Path | str = RUNS_DIR) -> None:
-        if isinstance(runs_path, str):
-            runs_path = Path(runs_path)
+    def __init__(self, runs_folder: Path | str = RUNS_DIR) -> None:
+        if isinstance(runs_folder, str):
+            runs_folder = Path(runs_folder)
 
-        runs_path.mkdir(parents=True, exist_ok=True)
-        self.runs_path = runs_path
+        runs_folder.mkdir(parents=True, exist_ok=True)
+        self.runs_folder = runs_folder
+        self._configs_file_path = runs_folder / "configs.jsonl"
+        self._runs_file_path = runs_folder / "runs.jsonl"
+        self._results_file_path = runs_folder / "results.csv"
 
     def _new_run_id(self):
         now = datetime.now(timezone.utc)
@@ -218,14 +222,27 @@ class FileLogger(RunsLogger):
         random_chars = "".join(random.choices(chars, k=4))
         return f"{now.year}{now.month:02d}{now.day:02d}-{now.hour:02d}{now.minute:02d}-{random_chars}"
 
-    def save_config(self, run_confg: RunConfig) -> str:
-        raise NotImplementedError
+    def _generate_config_id(self, run_config: RunConfig) -> str:
+        config_json_string = json.dumps(RunConfig.model_dump(
+            run_config, mode="json", exclude={"config_id", "created_at"}), sort_keys=True,)
 
-    def get_config(self, config_id: str) -> RunConfig:
-        raise NotImplementedError
+        return get_sha256(config_json_string, length=8)
+
+    def save_config(self, run_config: RunConfig) -> str:
+        config_id = self._generate_config_id(run_config)
+        # TODO
+        return config_id
+
+    def get_config(self, config_id: str) -> RunConfig | None:
+        pass
 
     def start_run(self, config: RunConfig, split: str, source_run_id: str) -> ActiveRun:
-        raise NotImplementedError
+        return ActiveRun(
+            logger=self,
+            config_id=config.config_id,
+            split=split,
+            run_id=self._new_run_id(),
+            source_run_id=source_run_id)
 
     def save_artifact(self, run_id: str, run_artifact: RunArtifact) -> None:
         raise NotImplementedError
@@ -237,4 +254,7 @@ class FileLogger(RunsLogger):
         raise NotImplementedError
 
     def save_code_patch(self, run_id: str, diff: str) -> None:
+        raise NotImplementedError
+
+    def save_results(self) -> None:
         raise NotImplementedError

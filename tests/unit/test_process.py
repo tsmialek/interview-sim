@@ -1,9 +1,17 @@
-import pytest
-from unittest.mock import MagicMock
 from types import SimpleNamespace
 
 from process import transcribe
 from log_runs import TranscribeArtifact
+from faster_whisper.transcribe import Word
+
+
+def make_word(
+    word: str,
+    start: float = 0.0,
+    end: float = 1.0,
+    probability: float = 0.9
+) -> Word:
+    return Word(start, end, word, probability)
 
 
 def make_fake_segment(
@@ -13,7 +21,7 @@ def make_fake_segment(
         text=text,
         start=start,
         end=end,
-        words=words or []
+        words=words or [make_word(word) for word in text.strip().split(" ")]
     )
 
 
@@ -44,5 +52,5 @@ def test_transcribe_returns_proper_artifact(default_whisper_config, mocker):
         rec_id="rec_1",
         final_text=final_text,
         whisper_text=final_text,
-        words=[]
+        words=[make_word(word) for word in final_text.split(" ")]
     )
