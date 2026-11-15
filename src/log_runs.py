@@ -60,13 +60,13 @@ class WhisperConfig(BaseModel):
     beam_size: int
     temperature: Union[float, List[float]]
     vad_filter: bool
-    word_timestamps: bool
-    initial_prompt: str | None
-    no_speech_threshold: float | None
-    log_prob_threshold: float | None
-    compression_ratio_threshold: float | None
-    hotwords: List[str] | str | None
-    hotwords_source: str | None
+    word_timestamps: bool = True
+    initial_prompt: str | None = None
+    no_speech_threshold: float | None = None
+    log_prob_threshold: float | None = None
+    compression_ratio_threshold: float | None = None
+    hotwords: List[str] | str | None = None
+    hotwords_source: str | None = None
 
     def get_transcribe_args(self) -> Dict[str, Any]:
         args: Dict[str, Any] = {}
@@ -84,11 +84,14 @@ class WhisperConfig(BaseModel):
 class RunConfig(BaseModel):
     config_id: str | None = None
     variant: int
-    parent_config_id: str | None
+    parent_config_id: str | None = None
     created_at: datetime | None = None
     whisper: WhisperConfig
-    dictionary: DictionaryConfig | None
-    slm: SlmConfig | None
+    dictionary: DictionaryConfig | None = None
+    slm: SlmConfig | None = None
+
+
+AudioSplit = Literal["dev", "test"]
 
 
 class Replacement(BaseModel):
@@ -106,14 +109,15 @@ class RunArtifact(BaseModel):
 
 class TranscribeArtifact(RunArtifact):
     kind: Literal["transcribe"] = "transcribe"
-    whisper_text: str
     words: List[Word]
+    transcribe_s: float
 
 
 class ReplaceArtifact(RunArtifact):
     kind: Literal["replace"] = "replace"
     replacements: List[Replacement]
     rejected: List[Replacement]
+    replace_s: float
 
 
 Artifact = Annotated[
@@ -150,7 +154,11 @@ class RunsLogger(ABC):
 
     @abstractmethod
     def start_run(
-        self, config: RunConfig, split: str, source_run_id: str, key_packages: list[str]
+        self,
+        config_id: str,
+        split: str,
+        key_packages: list[str],
+        source_run_id: str | None = None,
     ) -> ActiveRun:
         pass
 
@@ -186,7 +194,7 @@ class ActiveRun:
         run_id: str,
         config_id: str,
         split: str,
-        source_run_id: str,
+        source_run_id: str | None,
         key_packages: list[str],
         project_dir: Path | str = PROJECT_DIR,
     ) -> None:
@@ -308,16 +316,23 @@ class FileLogger(RunsLogger):
         return None
 
     def start_run(
-        self, config: RunConfig, split: str, source_run_id: str, key_packages: list[str]
+        self,
+        config_id: str,
+        split: str,
+        key_packages: list[str],
+        source_run_id: str | None = None,
     ) -> ActiveRun:
-        if not config.config_id:
-            raise Exception(f"Missing 'config_id' in: {config}")
+        config = self.get_config(config_id)
+        if not config:
+            raise ValueError(
+                f"Could not find config with id: {config_id} in: {self._configs_file_path}"
+            )
 
         run_id = self._new_run_id()
         (self.runs_folder / run_id).mkdir()
         return ActiveRun(
             logger=self,
-            config_id=config.config_id,
+            config_id=config_id,
             split=split,
             run_id=run_id,
             source_run_id=source_run_id,

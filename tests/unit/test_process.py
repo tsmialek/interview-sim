@@ -29,9 +29,10 @@ def test_transcribe_returns_proper_artifact(default_whisper_config, mocker):
     result = transcribe(mock_model, default_whisper_config, "/tmp/path/rec_1.wav")
     final_text = "To jest test whispera. To jest drugie zdanie. To jest kolejne zdanie."
 
-    assert result == TranscribeArtifact(
+    assert result.model_dump(exclude={"transcribe_s"}) == TranscribeArtifact(
         rec_id="rec_1",
         final_text=final_text,
-        whisper_text=final_text,
         words=[make_word(word) for word in final_text.split(" ")],
-    )
+        transcribe_s=20.1,
+    ).model_dump(exclude={"transcribe_s"})
+    assert result.transcribe_s > 0

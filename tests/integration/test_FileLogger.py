@@ -147,8 +147,8 @@ def test_save_and_get_artifact_returns_proper_instance(tmp_path):
     t_art = TranscribeArtifact(
         rec_id=t_rec_id,
         final_text="This is final text",
-        whisper_text=whisper_text,
         words=words,
+        transcribe_s=10.0,
     )
 
     r_art = ReplaceArtifact(
@@ -159,6 +159,7 @@ def test_save_and_get_artifact_returns_proper_instance(tmp_path):
             make_replacement("fial", "final"),
             make_replacement("replejsment", "replacement"),
         ],
+        replace_s=10.0,
     )
 
     logger.save_artifact(run_id, t_art)
