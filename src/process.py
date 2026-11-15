@@ -1,13 +1,20 @@
-from log_runs import TranscribeArtifact, ReplaceArtifact, WhisperConfig, SlmConfig, DictionaryConfig
+from log_runs import (
+    TranscribeArtifact,
+    ReplaceArtifact,
+    WhisperConfig,
+    SlmConfig,
+    DictionaryConfig,
+)
 from faster_whisper import WhisperModel
 import pandas as pd
 from pathlib import Path
 
 
-def transcribe(whisper_model: WhisperModel, whisper_conf: WhisperConfig, audio_path: Path | str) -> TranscribeArtifact:
+def transcribe(
+    whisper_model: WhisperModel, whisper_conf: WhisperConfig, audio_path: Path | str
+) -> TranscribeArtifact:
     segments, info = whisper_model.transcribe(
-        audio=str(audio_path),
-        **whisper_conf.get_transcribe_args()
+        audio=str(audio_path), **whisper_conf.get_transcribe_args()
     )
 
     rec_id = Path(audio_path).stem
@@ -23,14 +30,16 @@ def transcribe(whisper_model: WhisperModel, whisper_conf: WhisperConfig, audio_p
     final_text = normalize_transcript(whisper_text)
 
     return TranscribeArtifact(
-        rec_id=rec_id,
-        final_text=final_text,
-        whisper_text=whisper_text,
-        words=words
+        rec_id=rec_id, final_text=final_text, whisper_text=whisper_text, words=words
     )
 
 
-def replace_terms(generated_transcript: str, dictionary: pd.DataFrame, dict_config: DictionaryConfig, slm_config: SlmConfig | None) -> ReplaceArtifact:
+def replace_terms(
+    generated_transcript: str,
+    dictionary: pd.DataFrame,
+    dict_config: DictionaryConfig,
+    slm_config: SlmConfig | None,
+) -> ReplaceArtifact:
     pass
 
 

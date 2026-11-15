@@ -1,9 +1,5 @@
 import pytest
 from dataclasses import replace
-import random
-from unittest.mock import patch
-from datetime import datetime, timezone
-from log_runs import FileLogger
 
 from log_runs import WhisperConfig
 
@@ -16,8 +12,10 @@ def test_get_transcribe_args_excludes_internal_fields(default_whisper_config):
 
 
 def test_get_transcribe_args_omits_none_values(default_whisper_config):
-    cfg = WhisperConfig.model_copy(default_whisper_config, update={
-                                   "initial_prompt": None, "no_speech_threshbold": None})
+    cfg = WhisperConfig.model_copy(
+        default_whisper_config,
+        update={"initial_prompt": None, "no_speech_threshbold": None},
+    )
     args = cfg.get_transcribe_args()
 
     assert "initial_prompt" not in args
@@ -34,8 +32,9 @@ def test_get_transcribe_args_omits_none_values(default_whisper_config):
 def test_get_transcribe_args_formats_hotwords_correctly(
     default_whisper_config, hotwords_input, expected_output
 ):
-    cfg = WhisperConfig.model_copy(default_whisper_config, update={
-                                   "hotwords": hotwords_input})
+    cfg = WhisperConfig.model_copy(
+        default_whisper_config, update={"hotwords": hotwords_input}
+    )
     args = cfg.get_transcribe_args()
 
     assert args["hotwords"] == expected_output

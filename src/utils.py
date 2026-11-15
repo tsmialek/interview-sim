@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Dict, Literal
 import subprocess
 import hashlib
 from importlib.metadata import distributions
@@ -11,7 +10,7 @@ def get_last_commit(repo_path: Path | str) -> str:
         cwd=repo_path,
         capture_output=True,
         text=True,
-        check=True
+        check=True,
     )
 
     return result.stdout.strip()
@@ -19,14 +18,15 @@ def get_last_commit(repo_path: Path | str) -> str:
 
 def get_git_changed_files(repo_path: Path | str) -> str:
     result = subprocess.run(
-        ["git", "status", "--porcelain"],
+        ["git", "status", "-u", "-z", "--porcelain"],
         cwd=repo_path,
         capture_output=True,
         text=True,
-        check=True
+        check=True,
     )
 
-    return result.stdout.strip()
+    files = result.stdout.split("\0")
+    return "\n".join([file.strip() for file in files]).strip()
 
 
 def get_current_diffs(repo_path: Path | str) -> str:
@@ -40,9 +40,17 @@ def get_current_diffs(repo_path: Path | str) -> str:
         if not line.strip():
             continue
 
-        file_path = line.strip().split()[-1]
+        components = line.strip().split(maxsplit=1)
+        mode, file_path = components
+
+        cmd = ["git", "--no-pager", "diff"]
+        if mode == "??":
+            cmd.extend(["--no-index", "/dev/null", f"{file_path}"])
+        else:
+            cmd.extend(["HEAD"])
+
         res = subprocess.run(
-            ["git", "--no-pager", "diff", "--no-index", "/dev/null", file_path],
+            cmd,
             cwd=repo_path,
             capture_output=True,
             text=True,
@@ -57,20 +65,24 @@ def get_current_diffs(repo_path: Path | str) -> str:
     return "\n\n".join(diffs)
 
 
-def get_project_environment() -> dict[str, str]:
-    return {
-        dist.metadata["Name"]: dist.version
-        for dist in distributions()
-        if dist.metadata.get("Name")
-    }
+def get_project_environment(
+    packages: list[str] | None = None,
+) -> dict[str, str]:
+    target_packages = (
+        {pkg.lower().replace("_", "-") for pkg in packages} if packages else None
+    )
 
+    result: dict[str, str] = {}
+    for dist in distributions():
+        name = dist.metadata.get("Name")
+        if not name:
+            continue
 
-def append_jsonl(file_path: Path | str, row: str) -> None:
-    pass
+        normalized_name = name.lower().replace("_", "-")
+        if target_packages is None or normalized_name in target_packages:
+            result[name] = dist.version
 
-
-def append_csv(file_path: Path | str, row: str) -> None:
-    pass
+    return result
 
 
 def get_sha256(text: str, length: int | None = None) -> str:
