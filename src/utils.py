@@ -25,8 +25,8 @@ def get_git_changed_files(repo_path: Path | str) -> str:
         check=True,
     )
 
-    files = result.stdout.split("\0")
-    return "\n".join([file.strip() for file in files]).strip()
+    files = [f for f in result.stdout.split("\0") if f]
+    return "\n".join([file for file in files]).strip()
 
 
 def get_current_diffs(repo_path: Path | str) -> str:
@@ -40,14 +40,14 @@ def get_current_diffs(repo_path: Path | str) -> str:
         if not line.strip():
             continue
 
-        components = line.strip().split(maxsplit=1)
-        mode, file_path = components
+        mode = line[:3]
+        file_path = line[3:].strip()
 
         cmd = ["git", "--no-pager", "diff"]
-        if mode == "??":
-            cmd.extend(["--no-index", "/dev/null", f"{file_path}"])
+        if mode in ["?? "]:
+            cmd.extend(["--no-index", "/dev/null", "--", f"{file_path}"])
         else:
-            cmd.extend(["HEAD"])
+            cmd.extend(["HEAD", "--", f"{file_path}"])
 
         res = subprocess.run(
             cmd,
@@ -60,7 +60,7 @@ def get_current_diffs(repo_path: Path | str) -> str:
             if res.stdout.strip():
                 diffs.append(res.stdout.strip())
         else:
-            diffs.append(res.stderr.strip())
+            raise RuntimeError(f"Error when checking changed files: {res.stderr}")
 
     return "\n\n".join(diffs)
 
