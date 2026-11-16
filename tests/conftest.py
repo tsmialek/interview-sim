@@ -1,6 +1,7 @@
 from dataclasses import replace
 import pytest
 from log_runs import (
+    Run,
     RunConfig,
     RunResults,
     WhisperConfig,
@@ -82,3 +83,22 @@ def make_run_results():
         )
 
     return _factory
+
+
+@pytest.fixture
+def get_default_run():
+    return Run(
+        run_id="123@abc",
+        config_id="abc@123",
+        duration_s=20.5,
+        error=None,
+        finished_at=datetime.datetime(2026, 11, 11).isoformat(),
+        git_commit="123hash321",
+        git_dirty=False,
+        packages={"faster-whisper": "1.1.1", "jiwer": "1.1b"},
+        rec_ids=["rec_1", "rec_2"],
+        source_run_id=None,
+        split="dev",
+        started_at=datetime.datetime(2026, 11, 12).isoformat(),
+        status="ok",
+    )

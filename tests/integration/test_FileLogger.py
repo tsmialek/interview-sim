@@ -1,11 +1,6 @@
 from datetime import datetime, timezone
 
-from log_runs import (
-    FileLogger,
-    ReplaceArtifact,
-    RunConfig,
-    TranscribeArtifact,
-)
+from log_runs import FileLogger, ReplaceArtifact, RunConfig, TranscribeArtifact, Run
 from tests.helpers import make_replacement, make_word
 
 excluded_fields = {"config_id", "created_at"}
@@ -41,6 +36,30 @@ def test_save_config_saves_config(tmp_path, default_run_config):
     assert saved_config.model_dump(
         exclude=excluded_fields
     ) == default_run_config.model_dump(exclude=excluded_fields)
+
+
+def test_save_run(tmp_path, get_default_run):
+    runs_dir = tmp_path / "runs"
+    logger = FileLogger(runs_dir)
+
+    logger.save_run(get_default_run)
+
+    for run in (runs_dir / "runs.jsonl").read_text().splitlines():
+        assert Run.model_validate_json(run) == get_default_run
+
+
+def test_get_run(tmp_path, get_default_run):
+    runs_dir = tmp_path / "runs"
+    logger = FileLogger(runs_dir)
+    logger.save_run(get_default_run)
+
+    assert logger.get_run(get_default_run.run_id) == get_default_run
+
+
+def test_get_non_existent_run_returns_none(tmp_path):
+    runs_dir = tmp_path / "runs"
+    logger = FileLogger(runs_dir)
+    assert logger.get_run("123abc") == None
 
 
 def test_save_config_two_identical_configs_are_saved_once(tmp_path, default_run_config):

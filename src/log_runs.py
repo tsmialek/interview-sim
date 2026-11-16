@@ -149,7 +149,7 @@ class RunsLogger(ABC):
         pass
 
     @abstractmethod
-    def get_config(self, config_id: str) -> RunConfig:
+    def get_config(self, config_id: str) -> RunConfig | None:
         pass
 
     @abstractmethod
@@ -172,6 +172,10 @@ class RunsLogger(ABC):
 
     @abstractmethod
     def save_run(self, run: Run) -> None:
+        pass
+
+    @abstractmethod
+    def get_run(self, run_id: str) -> Run:
         pass
 
     @abstractmethod
@@ -356,6 +360,16 @@ class FileLogger(RunsLogger):
     def save_run(self, run: Run) -> None:
         with open(self._runs_file_path, "a", encoding="utf-8") as file:
             file.write(run.model_dump_json() + "\n")
+
+    def get_run(self, run_id: str) -> Run | None:
+        if not self._runs_file_path.exists():
+            return None
+
+        with open(self._runs_file_path, "r", encoding="utf-8") as file:
+            for line in file:
+                run = Run.model_validate_json(line)
+                if run.run_id == run_id:
+                    return run
 
     def save_code_patch(self, run_id: str, diff: str) -> None:
         with open(
