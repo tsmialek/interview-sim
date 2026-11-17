@@ -1,3 +1,5 @@
+import jiwer
+
 from calculate_metrics import (
     parse_reference,
     normalize_for_cer_wer,
@@ -6,7 +8,10 @@ from calculate_metrics import (
 
 
 def test_calculate_metrics():
-    pass
+    out = jiwer.process_words("ala ma kota i psa", "ala ma kot i psa i")
+    print(out)
+
+    assert 1 == 0
 
 
 def test_parse_reference_returns_text_with_terms_list():

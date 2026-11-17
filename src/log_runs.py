@@ -143,7 +143,7 @@ class RunResults(BaseModel):
     duration_s: float
 
 
-class RunsLogger(ABC):
+class RunRepository(ABC):
     @abstractmethod
     def save_config(self, run_confg: RunConfig) -> str:
         pass
@@ -194,7 +194,7 @@ class RunsLogger(ABC):
 class ActiveRun:
     def __init__(
         self,
-        logger: RunsLogger,
+        logger: RunRepository,
         run_id: str,
         config_id: str,
         split: str,
@@ -268,7 +268,7 @@ class ActiveRun:
         return self.logger.get_artifact(self.run_id, rec_id)
 
 
-class FileLogger(RunsLogger):
+class FileRunRepository(RunRepository):
     def __init__(self, runs_folder: Path | str = RUNS_DIR) -> None:
         if isinstance(runs_folder, str):
             runs_folder = Path(runs_folder)

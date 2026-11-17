@@ -1,6 +1,12 @@
 from datetime import datetime, timezone
 
-from log_runs import FileLogger, ReplaceArtifact, RunConfig, TranscribeArtifact, Run
+from log_runs import (
+    FileRunRepository,
+    ReplaceArtifact,
+    RunConfig,
+    TranscribeArtifact,
+    Run,
+)
 from tests.helpers import make_replacement, make_word
 
 excluded_fields = {"config_id", "created_at"}
@@ -8,9 +14,9 @@ excluded_fields = {"config_id", "created_at"}
 
 def test_save_config_empty_folder_creates_file(tmp_path, default_run_config):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
+    repo = FileRunRepository(runs_dir)
 
-    logger.save_config(default_run_config)
+    repo.save_config(default_run_config)
 
     configs_file = runs_dir / "configs.jsonl"
     assert len(configs_file.read_text(encoding="utf-8").splitlines()) == 1
@@ -18,13 +24,13 @@ def test_save_config_empty_folder_creates_file(tmp_path, default_run_config):
 
 def test_save_config_saves_config(tmp_path, default_run_config):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
+    repo = FileRunRepository(runs_dir)
 
     configs_file = runs_dir / "configs.jsonl"
     configs_file.touch()
 
     before_save = datetime.now(tz=timezone.utc)
-    config_id = logger.save_config(default_run_config)
+    config_id = repo.save_config(default_run_config)
     after_save = datetime.now(tz=timezone.utc)
 
     for line in configs_file.read_text(encoding="utf-8").splitlines():
@@ -40,9 +46,9 @@ def test_save_config_saves_config(tmp_path, default_run_config):
 
 def test_save_run(tmp_path, get_default_run):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
+    repo = FileRunRepository(runs_dir)
 
-    logger.save_run(get_default_run)
+    repo.save_run(get_default_run)
 
     for run in (runs_dir / "runs.jsonl").read_text().splitlines():
         assert Run.model_validate_json(run) == get_default_run
@@ -50,24 +56,24 @@ def test_save_run(tmp_path, get_default_run):
 
 def test_get_run(tmp_path, get_default_run):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    logger.save_run(get_default_run)
+    repo = FileRunRepository(runs_dir)
+    repo.save_run(get_default_run)
 
-    assert logger.get_run(get_default_run.run_id) == get_default_run
+    assert repo.get_run(get_default_run.run_id) == get_default_run
 
 
 def test_get_non_existent_run_returns_none(tmp_path):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    assert logger.get_run("123abc") == None
+    repo = FileRunRepository(runs_dir)
+    assert repo.get_run("123abc") == None
 
 
 def test_save_config_two_identical_configs_are_saved_once(tmp_path, default_run_config):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
+    repo = FileRunRepository(runs_dir)
 
-    first_conifg_id = logger.save_config(default_run_config)
-    second_config_id = logger.save_config(default_run_config)
+    first_conifg_id = repo.save_config(default_run_config)
+    second_config_id = repo.save_config(default_run_config)
 
     configs_file = runs_dir / "configs.jsonl"
 
@@ -79,19 +85,19 @@ def test_save_config_two_different_saved_separately(
     tmp_path, default_run_config, default_whisper_config
 ):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
+    repo = FileRunRepository(runs_dir)
 
-    first_conifg_id = logger.save_config(default_run_config)
+    first_conifg_id = repo.save_config(default_run_config)
 
     another_whisper_config = default_whisper_config.model_copy(
-        update={"hotwords": ["test", "file", "logger"]}
+        update={"hotwords": ["test", "file", "repo"]}
     )
     another_config = default_run_config.model_copy(
         update={"whisper": another_whisper_config}
     )
 
     before_save = datetime.now(tz=timezone.utc)
-    second_config_id = logger.save_config(another_config)
+    second_config_id = repo.save_config(another_config)
     after_save = datetime.now(tz=timezone.utc)
     configs_file = runs_dir / "configs.jsonl"
 
@@ -115,20 +121,20 @@ def test_get_config_reads_config_by_id_properly(
     tmp_path, default_run_config, default_whisper_config
 ):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
+    repo = FileRunRepository(runs_dir)
 
     another_whisper_config = default_whisper_config.model_copy(
-        update={"hotwords": ["test", "file", "logger"]}
+        update={"hotwords": ["test", "file", "repo"]}
     )
     another_config = default_run_config.model_copy(
         update={"whisper": another_whisper_config}
     )
 
     before_save = datetime.now(tz=timezone.utc)
-    second_config_id = logger.save_config(another_config)
+    second_config_id = repo.save_config(another_config)
     after_save = datetime.now(tz=timezone.utc)
 
-    fetched_second_config = logger.get_config(second_config_id)
+    fetched_second_config = repo.get_config(second_config_id)
 
     assert fetched_second_config is not None
     assert second_config_id == fetched_second_config.config_id
@@ -144,18 +150,18 @@ def test_get_config_reads_config_by_id_properly(
 
 
 def test_save_config_does_not_mutate_input(tmp_path, default_run_config):
-    logger = FileLogger(tmp_path / "runs")
+    repo = FileRunRepository(tmp_path / "runs")
     original = default_run_config.model_copy(deep=True)
 
-    logger.save_config(default_run_config)
+    repo.save_config(default_run_config)
 
     assert default_run_config == original
 
 
 def test_save_and_get_artifact_returns_proper_instance(tmp_path):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    run_id = logger._new_run_id()
+    repo = FileRunRepository(runs_dir)
+    run_id = repo._new_run_id()
     (runs_dir / run_id).mkdir(exist_ok=True)
 
     whisper_text = "This is whisper text"
@@ -181,31 +187,31 @@ def test_save_and_get_artifact_returns_proper_instance(tmp_path):
         replace_s=10.0,
     )
 
-    logger.save_artifact(run_id, t_art)
-    logger.save_artifact(run_id, r_art)
+    repo.save_artifact(run_id, t_art)
+    repo.save_artifact(run_id, r_art)
 
     current_run_dir = tmp_path / "runs" / run_id
     assert len(list(current_run_dir.iterdir())) == 2
 
-    fetched_t_art = logger.get_artifact(run_id, t_rec_id)
+    fetched_t_art = repo.get_artifact(run_id, t_rec_id)
     assert isinstance(fetched_t_art, TranscribeArtifact)
     assert t_art == fetched_t_art
 
-    fetched_r_art = logger.get_artifact(run_id, r_rec_id)
+    fetched_r_art = repo.get_artifact(run_id, r_rec_id)
     assert isinstance(fetched_r_art, ReplaceArtifact)
     assert r_art == fetched_r_art
 
 
 def test_save_results_twice_saves_header_once(tmp_path, make_run_results):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    run_id = logger._new_run_id()
+    repo = FileRunRepository(runs_dir)
+    run_id = repo._new_run_id()
 
     first_result = make_run_results(run_id=run_id, rec_id="rec_1")
     second_result = make_run_results(run_id=run_id, rec_id="rec_2")
 
-    logger.save_results(first_result)
-    logger.save_results(second_result)
+    repo.save_results(first_result)
+    repo.save_results(second_result)
 
     results_file = runs_dir / "results.csv"
 
@@ -220,45 +226,45 @@ def test_save_results_twice_saves_header_once(tmp_path, make_run_results):
 
 def test_get_results_non_existend_rec_id_returns_empty_list(tmp_path, make_run_results):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    run_id = logger._new_run_id()
+    repo = FileRunRepository(runs_dir)
+    run_id = repo._new_run_id()
 
     first_result = make_run_results(run_id=run_id, rec_id="rec_1")
     second_result = make_run_results(run_id=run_id, rec_id="rec_2")
 
-    logger.save_results(first_result)
-    logger.save_results(second_result)
+    repo.save_results(first_result)
+    repo.save_results(second_result)
 
-    assert logger.get_results(run_id, "rec_99") == []
+    assert repo.get_results(run_id, "rec_99") == []
 
 
 def test_get_results_with_run_id_only_returns_list_of_all_records(
     tmp_path, make_run_results
 ):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    run_id = logger._new_run_id()
+    repo = FileRunRepository(runs_dir)
+    run_id = repo._new_run_id()
 
     first_result = make_run_results(run_id=run_id, rec_id="rec_1")
     second_result = make_run_results(run_id=run_id, rec_id="rec_2")
 
-    logger.save_results(first_result)
-    logger.save_results(second_result)
+    repo.save_results(first_result)
+    repo.save_results(second_result)
 
-    assert logger.get_results(run_id) == [first_result, second_result]
+    assert repo.get_results(run_id) == [first_result, second_result]
 
 
 def test_get_results_with_rec_id_returns_only_given_record_result(
     tmp_path, make_run_results
 ):
     runs_dir = tmp_path / "runs"
-    logger = FileLogger(runs_dir)
-    run_id = logger._new_run_id()
+    repo = FileRunRepository(runs_dir)
+    run_id = repo._new_run_id()
 
     first_result = make_run_results(run_id=run_id, rec_id="rec_1")
     second_result = make_run_results(run_id=run_id, rec_id="rec_2")
 
-    logger.save_results(first_result)
-    logger.save_results(second_result)
+    repo.save_results(first_result)
+    repo.save_results(second_result)
 
-    assert logger.get_results(run_id, "rec_2") == [second_result]
+    assert repo.get_results(run_id, "rec_2") == [second_result]

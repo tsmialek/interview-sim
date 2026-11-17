@@ -21,6 +21,7 @@ def calculate_metrics(
     run_artifact: Artifact,
     parsed_reference_text: str,
     reference_terms: list[Tuple[str, str]],
+    hidden_terms: list[str],
 ) -> RunResults:
     pass
 
