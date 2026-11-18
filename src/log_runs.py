@@ -1,3 +1,10 @@
+"""Recording and reading ASR experiment runs.
+
+A run applies one ``RunConfig`` to every recording of a split. It stores one
+artifact per recording and enough metadata (git commit, uncommitted code patch,
+package versions) to reproduce the result later.
+"""
+
 from __future__ import annotations
 
 import time
@@ -24,6 +31,14 @@ from utils import (
 
 
 class Run(BaseModel):
+    """Metadata of one finished (or failed) execution of a config.
+
+    ``source_run_id`` points to the run whose artifacts this run took as input,
+    e.g. a dictionary correction run built on a plain Whisper run.
+    ``git_dirty`` is True when the code had uncommitted changes; in that case
+    the run folder also holds a ``code.patch``.
+    """
+
     run_id: str
     config_id: str
     source_run_id: str | None
@@ -47,6 +62,12 @@ class SlmConfig(BaseModel):
 
 
 class DictionaryConfig(BaseModel):
+    """Settings of the dictionary based correction.
+
+    The term files are stored as hashes, so editing a dictionary produces a new
+    config instead of silently changing the meaning of an old one.
+    """
+
     terms_sha: str
     hidden_terms_sha: str
     rapidfuzz_threshold: float
@@ -69,6 +90,13 @@ class WhisperConfig(BaseModel):
     hotwords_source: str | None = None
 
     def get_transcribe_args(self) -> Dict[str, Any]:
+        """Return keyword arguments for ``WhisperModel.transcribe``.
+
+        Drops the fields used only to load the model (``model``, ``device``,
+        ``compute_type``) or only for logging (``hotwords_source``), drops
+        ``None`` values so Whisper keeps its defaults, and joins a ``hotwords``
+        list into the single space separated string Whisper expects.
+        """
         args: Dict[str, Any] = {}
         for field, value in self.model_dump(
             exclude={"model", "device", "compute_type", "hotwords_source"},
@@ -82,6 +110,13 @@ class WhisperConfig(BaseModel):
 
 
 class RunConfig(BaseModel):
+    """Full description of one experiment variant.
+
+    ``config_id`` and ``created_at`` are left empty by the caller and filled in
+    by the repository when the config is saved. ``config_id`` is a hash of the
+    remaining fields, so identical configs always share one id.
+    """
+
     config_id: str | None = None
     variant: int
     parent_config_id: str | None = None
@@ -95,6 +130,13 @@ AudioSplit = Literal["dev", "test"]
 
 
 class Replacement(BaseModel):
+    """One change made to the transcript by a correction step.
+
+    ``r_from`` is the text found in the transcript, ``r_to`` the text put in
+    its place, ``base_term`` the dictionary term behind the change, and
+    ``source`` the step that made it (e.g. dictionary or SLM).
+    """
+
     r_from: str
     r_to: str
     base_term: str
@@ -103,6 +145,8 @@ class Replacement(BaseModel):
 
 
 class RunArtifact(BaseModel):
+    """Output of a run for a single recording; ``final_text`` is what gets scored."""
+
     rec_id: str
     final_text: str
 
@@ -120,6 +164,8 @@ class ReplaceArtifact(RunArtifact):
     replace_s: float
 
 
+# Any artifact type. The ``kind`` field tells pydantic which class to build when
+# reading JSON, so ``artifact_adapter.validate_json`` returns the right subclass.
 Artifact = Annotated[
     Union[TranscribeArtifact, ReplaceArtifact], Field(discriminator="kind")
 ]
@@ -127,6 +173,16 @@ artifact_adapter = TypeAdapter(Artifact)
 
 
 class RunResults(BaseModel):
+    """Raw counts for one recording in one run, used to compute the metrics.
+
+    Counts are stored instead of ratios so results can be summed over
+    recordings before dividing (e.g. CER = sum of ``char_errors`` / sum of
+    ``ref_chars``). ``*_known`` refers to terms from the dictionary,
+    ``*_hidden`` to terms deliberately left out of it. ``hits_*`` counts terms
+    recognised correctly, ``form_hits_*`` counts terms written in the exact
+    spoken form.
+    """
+
     run_id: str
     rec_id: str
     ref_chars: int
@@ -144,6 +200,12 @@ class RunResults(BaseModel):
 
 
 class RunRepository(ABC):
+    """Storage for configs, runs, artifacts and results.
+
+    Experiment code depends only on this interface, so the storage backend
+    (files, a database) can change without touching it.
+    """
+
     @abstractmethod
     def save_config(self, run_confg: RunConfig) -> str:
         pass
@@ -192,6 +254,18 @@ class RunRepository(ABC):
 
 
 class ActiveRun:
+    """A run in progress, used as a context manager.
+
+    Entering records the start time, package versions, git commit and a patch
+    of uncommitted changes. Exiting always saves the ``Run``, with status
+    ``"failed"`` and the error when an exception was raised, and does not
+    suppress that exception.
+
+    Example:
+        with repo.start_run(config_id, split="dev", key_packages=pkgs) as run:
+            run.save_artifact(artifact)
+    """
+
     def __init__(
         self,
         logger: RunRepository,
@@ -269,6 +343,17 @@ class ActiveRun:
 
 
 class FileRunRepository(RunRepository):
+    """``RunRepository`` that keeps everything in plain files::
+
+        runs/
+        ├── configs.jsonl      one RunConfig per line
+        ├── runs.jsonl         one Run per line
+        ├── results.csv        one RunResults per row
+        └── <run_id>/
+            ├── <rec_id>.json  one artifact per recording
+            └── code.patch     uncommitted changes, if any
+    """
+
     def __init__(self, runs_folder: Path | str = RUNS_DIR) -> None:
         if isinstance(runs_folder, str):
             runs_folder = Path(runs_folder)
@@ -280,12 +365,18 @@ class FileRunRepository(RunRepository):
         self._results_file_path = runs_folder / "results.csv"
 
     def _new_run_id(self):
+        """Return an id like ``20261118-1430-aB3x``: UTC time plus 4 random characters."""
         now = datetime.now(timezone.utc)
         chars = string.ascii_letters + string.digits
         random_chars = "".join(random.choices(chars, k=4))
         return f"{now.year}{now.month:02d}{now.day:02d}-{now.hour:02d}{now.minute:02d}-{random_chars}"
 
     def _generate_config_id(self, run_config: RunConfig) -> str:
+        """Hash the config content into an 8 character id.
+
+        ``config_id`` and ``created_at`` are excluded, and keys are sorted, so
+        the id depends only on the settings and not on field order.
+        """
         config_json_string = json.dumps(
             run_config.model_dump(mode="json", exclude={"config_id", "created_at"}),
             sort_keys=True,
@@ -388,6 +479,10 @@ class FileRunRepository(RunRepository):
             writer.writerow(result_dict)
 
     def get_results(self, run_id: str, rec_id: str | None = None) -> list[RunResults]:
+        """Return the results of a run, or only the row for ``rec_id`` when given.
+
+        Returns an empty list when nothing matches.
+        """
         if not self._results_file_path.exists():
             return []
 
