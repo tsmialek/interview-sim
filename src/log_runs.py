@@ -130,11 +130,16 @@ AudioSplit = Literal["dev", "test"]
 
 
 class Replacement(BaseModel):
-    """One change made to the transcript by a correction step.
+    """One term replacement proposed by a correction step.
 
-    ``r_from`` is the text found in the transcript, ``r_to`` the text put in
-    its place, ``base_term`` the dictionary term behind the change, and
-    ``source`` the step that made it (e.g. dictionary or SLM).
+    Contract shared by all correction steps (dictionary, SLM, later HerBERT):
+    - r_from: fragment exactly as it appears in the INPUT text (case included)
+    - r_to: text to insert in its place, already inflected (e.g. "Jirze", "GraphQL-u")
+    - base_term: canonical term from data/terms_it.csv ("Jira"); for terms outside
+      the dictionary, the canonical form proposed by the SLM
+    - position: 0-based character index in the INPUT text (final_text of the source
+      artifact) where r_from starts, i.e. text[position:position + len(r_from)] == r_from
+    - source: which step proposed it: "dictionary" | "slm" (later "herbert")
     """
 
     r_from: str
@@ -237,7 +242,15 @@ class RunRepository(ABC):
         pass
 
     @abstractmethod
-    def get_run(self, run_id: str) -> Run:
+    def get_run(self, run_id: str) -> Run | None:
+        pass
+
+    @abstractmethod
+    def get_latest_run(self, config_id: str, split: str) -> Run | None:
+        """Most recent run with status "ok" for this config and split, or None.
+
+        Used by correction variants (3, 4) to find their source run.
+        """
         pass
 
     @abstractmethod
@@ -345,13 +358,13 @@ class ActiveRun:
 class FileRunRepository(RunRepository):
     """``RunRepository`` that keeps everything in plain files::
 
-        runs/
-        ├── configs.jsonl      one RunConfig per line
-        ├── runs.jsonl         one Run per line
-        ├── results.csv        one RunResults per row
-        └── <run_id>/
-            ├── <rec_id>.json  one artifact per recording
-            └── code.patch     uncommitted changes, if any
+    runs/
+    ├── configs.jsonl      one RunConfig per line
+    ├── runs.jsonl         one Run per line
+    ├── results.csv        one RunResults per row
+    └── <run_id>/
+        ├── <rec_id>.json  one artifact per recording
+        └── code.patch     uncommitted changes, if any
     """
 
     def __init__(self, runs_folder: Path | str = RUNS_DIR) -> None:
@@ -461,6 +474,25 @@ class FileRunRepository(RunRepository):
                 run = Run.model_validate_json(line)
                 if run.run_id == run_id:
                     return run
+
+        return None
+
+    def get_latest_run(self, config_id: str, split: str) -> Run | None:
+        if not self._runs_file_path.exists():
+            return None
+
+        latest: Run | None = None
+        with open(self._runs_file_path, "r", encoding="utf-8") as file:
+            for line in file:
+                run = Run.model_validate_json(line)
+                if (
+                    run.config_id == config_id
+                    and run.split == split
+                    and run.status == "ok"
+                ):
+                    latest = run
+
+        return latest
 
     def save_code_patch(self, run_id: str, diff: str) -> None:
         with open(

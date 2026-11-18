@@ -68,6 +68,34 @@ def test_get_non_existent_run_returns_none(tmp_path):
     assert repo.get_run("123abc") == None
 
 
+def test_get_latest_run_returns_last_ok_run_for_config_and_split(
+    tmp_path, get_default_run
+):
+    repo = FileRunRepository(tmp_path / "runs")
+    older = get_default_run.model_copy(update={"run_id": "older"})
+    newer = get_default_run.model_copy(update={"run_id": "newer"})
+    failed = get_default_run.model_copy(update={"run_id": "failed", "status": "failed"})
+    other_split = get_default_run.model_copy(update={"run_id": "test", "split": "test"})
+    other_config = get_default_run.model_copy(
+        update={"run_id": "other", "config_id": "other-config"}
+    )
+    for run in [older, newer, failed, other_split, other_config]:
+        repo.save_run(run)
+
+    latest = repo.get_latest_run(get_default_run.config_id, "dev")
+
+    assert latest is not None
+    assert latest.run_id == "newer"
+
+
+def test_get_latest_run_without_matching_run_returns_none(tmp_path, get_default_run):
+    repo = FileRunRepository(tmp_path / "runs")
+    assert repo.get_latest_run("any", "dev") is None
+
+    repo.save_run(get_default_run.model_copy(update={"status": "failed"}))
+    assert repo.get_latest_run(get_default_run.config_id, "dev") is None
+
+
 def test_save_config_two_identical_configs_are_saved_once(tmp_path, default_run_config):
     runs_dir = tmp_path / "runs"
     repo = FileRunRepository(runs_dir)

@@ -7,13 +7,6 @@ from calculate_metrics import (
 )
 
 
-def test_calculate_metrics():
-    out = jiwer.process_words("ala ma kota i psa", "ala ma kot i psa i")
-    print(out)
-
-    assert 1 == 0
-
-
 def test_parse_reference_returns_text_with_terms_list():
     transcript = " Yyy prywatnie korzystałem z {AWS|AWS} z systemów {EC2|EC2} oraz yyy z yyy funkcji klaudo- yyy z {Cloud functions|Cloud Functions}. Eee i próbowałem też {Self-hostować|self-hosting} {PocketBase|PocketBase}"
     text, terms_list = parse_reference(transcript)
