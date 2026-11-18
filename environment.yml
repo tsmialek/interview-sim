@@ -11,6 +11,8 @@ dependencies:
       # speech recognition (whisperx pins torch 2.8 and huggingface-hub < 1.0)
       - whisperx==3.8.6
       - faster-whisper==1.2.1
+      # faster-whisper 1.2.1 calls av.open(metadata_errors=...), which av 19 no longer accepts
+      - av==18.1.0
       - torch==2.8.0
       - torchaudio==2.8.0
       - librosa==1.0.0

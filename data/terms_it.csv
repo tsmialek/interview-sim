@@ -5,7 +5,7 @@ GitHub,githab|gitab|githuba|githubie|githubem|gitchab,tool,serwis do hostowania 
 GitLab,git lab|gitlaba|gitlabie|gitlabem|gitlabu,tool,platforma do repozytoriów i CI/CD
 Jenkins,dżenkins|dżenkinsa|dżenkinsie|dżenkinsem|jenkinsa,tool,serwer automatyzacji buildów
 Slack,slak|slaka|slaku|slacku|slackiem|slakiem,tool,komunikator zespołowy
-Microsoft Teams,timsy|timsach|teamsy|teamsach|teamsie|tims|timsa|teamsa,tool,komunikator i spotkania online
+Microsoft Teams,timsy|timsach|teamsy|teamsach|teamsie|tims|timsa|teamsa|teams,tool,komunikator i spotkania online
 Postman,postmana|postmanie|postmanem|postmen,tool,narzędzie do testowania API
 Grafana,grafany|grafanie|grafaną|grafanę,tool,wizualizacja metryk i monitoring
 Terraform,teraform|terraforma|terraformie|terraformem|teraforma,tool,infrastruktura jako kod
@@ -17,7 +17,7 @@ PostgreSQL,postgres|postgresa|postgresie|postgresem|postgre|postgreskjuel,techno
 Elasticsearch,elastik|elastiksercz|elastica|elasticu|elastiku|elasticsearcha,technology,wyszukiwarka pełnotekstowa
 React,riakt|riakta|riakcie|riaktem|reacta|reactem|reakt,technology,biblioteka do budowy interfejsów
 Angular,angulara|angularze|angularem|engiular|angiular,technology,framework frontendowy
-TypeScript,tajpskrypt|tajpskryptu|tajpskrypcie|tajpskryptem|typescripta|typescriptem,technology,typowany JavaScript
+TypeScript,tajpskrypt|tajpskryptu|tajpskrypcie|tajpskryptem|typescripta|typescriptem|typescripcie,technology,typowany JavaScript
 Node.js,nołd|nołda|nołdzie|noud dżej es|nodejs|nodzie,technology,środowisko uruchomieniowe JavaScript
 Python,pajton|pajtona|pajtonie|pajtonem|pythona|pythonie,technology,język programowania
 Java,dżawa|dżawy|dżawie|dżawą|dżawę|javy|javie,technology,język programowania
@@ -30,9 +30,9 @@ sprint,sprintu|sprincie|sprinty|sprintów|sprintem,methodology,iteracja w Scrumi
 daily,dejli|dejlim|dejlika|dejliku|dejlis,methodology,codzienne krótkie spotkanie zespołu
 backlog,beklog|beklogu|bekloga|backlogu|beklogiem,methodology,lista zadań do zrobienia
 story points,stori pointy|stori pointów|story pointy|story pointów|storypointy,methodology,jednostka szacowania pracochłonności
-pull request,pul rikłest|pul rekłest|pull requesta|pull requeście|pull requesty|pi ar,concept,prośba o włączenie zmian do kodu
-code review,kod riwju|kod rewju|kod riwiu|code review'u|kodrewju,concept,przegląd kodu przez innych programistów
-merge,merdż|merdża|merdżu|merdżem|zmerdżować|mergować|merdżowane|mergowane,concept,scalenie gałęzi kodu
+pull request,pul rikłest|pul rekłest|pull requesta|pull requeście|pull requesty|pi ar|pr-ów,concept,prośba o włączenie zmian do kodu
+code review,kod riwju|kod rewju|kod riwiu|code review'u|kodrewju|review,concept,przegląd kodu przez innych programistów
+merge,merdż|merdża|merdżu|merdżem|zmerdżować|mergować|merdżowane|mergowane|mergujemy,concept,scalenie gałęzi kodu
 deploy,diploj|deploj|deploju|deployu|deplojem|deplojment|deployment,concept,wdrożenie aplikacji
 commit,komit|komita|komitem|komity|komitów|commita,concept,zapis zmian w repozytorium
 branch,brancz|brancza|branczu|branczem|branchu|branche,concept,gałąź w repozytorium
@@ -63,7 +63,7 @@ embedding,embeding|embedingi|embedingów|embeddingi|embeddingów,concept,wektoro
 cache,kesz|keszu|keszowanie|keszowania|cache'owanie,concept,pamięć podręczna na często używane dane
 blocker,bloker|blokery|blokerów|blokerem,concept,przeszkoda blokująca postęp zadania
 framework,frejmłork|frejmłorku|frejmłorka|frejmłorki|frejmłorkiem|fremłork|frejmwork|frameworku|frameworka|frameworki|frejmworka,concept,szkielet do budowy aplikacji
-JavaScript,dżawaskript|dżawa skript|dżawa skriptem|dżawa skripcie|dżawaskripcie,technology,język programowania stron i aplikacji webowych
+JavaScript,dżawaskript|dżawa skript|dżawa skriptem|dżawa skripcie|dżawaskripcie|javascripcie,technology,język programowania stron i aplikacji webowych
 Next.js,nekstdżejes|nextdżejesem|next dżejesie,technology,framework Reacta do aplikacji webowych
 Tcl,teceel|te ce el|te ce elem,technology,skryptowy język programowania
 Vercel,wercel|wercelem|wercelowi|wercelu,technology,platforma do hostowania frontendu
@@ -73,19 +73,19 @@ EC2,ecedwa|e ce dwa|e ce dwójce|ece dwójce|ece dwójki|ece dwójkom,technology
 Cloud Functions,klałd fankszyns|kloud funkszyns|klałd funkszions,technology,funkcje serverless w chmurze Google
 Microsoft,majkrosoft|majkrosoftu|majkrosoftem|majkrosoftowi,technology,firma i ekosystem narzędzi Microsoftu
 Outlook,ołtluk|outluk|outluka|ołtluku|outlukiem|ołtlukiem|ałtluk,tool,poczta i kalendarz Microsoftu
-VS Code,wieskołd|wi es kod,tool,edytor kodu Microsoftu
-GitHub Copilot,kopajlotem|kopajlot|kopajlotowi,tool,asystent AI do pisania kodu
+VS Code,wieskołd|wi es kod|vscode,tool,edytor kodu Microsoftu
+GitHub Copilot,kopajlotem|kopajlot|kopajlotowi|copilot,tool,asystent AI do pisania kodu
 Vocare,wokare,tool,platforma doradztwa zawodowego wspierana AI
 plugin,plagin|plugin|pluginowi|plaginu|plaginem,concept,wtyczka rozszerzająca program
 stack,stak|stakiem|stakowi|staku,concept,zestaw technologii używanych w projekcie
 request,rikłest|rikłesty|rikłestować|request,concept,żądanie wysyłane do serwera lub API
-feature,ficzer|ficzery,concept,nowa funkcjonalność aplikacji
+feature,ficzer|ficzery|featury,concept,nowa funkcjonalność aplikacji
 fix,fiks|fiksem|fixować|fiksowi,concept,poprawka błędu w kodzie
-merge request,merdż rikłest|merdż rikłestowi|merdż rikłeście|merdż request,concept,prośba o włączenie zmian do kodu w GitLabie
+merge request,merdż rikłest|merdż rikłestowi|merdż rikłeście|merdż request|merge requeście,concept,prośba o włączenie zmian do kodu w GitLabie
 develop,dewelop|develop|dewelopie|dewelopem,concept,gałąź integracyjna w repozytorium
 support,saport|suport|saportem|suportowi|saportowych,concept,gałąź utrzymaniowa starszej wersji systemu
-hosting,hostować|hosting|hostuje,concept,utrzymywanie aplikacji na serwerze
-self-hosting,self hosting|self hostować|self hostowany,concept,hostowanie usługi na własnym serwerze
+hosting,hostować|hosting|hostuje|hostujemy,concept,utrzymywanie aplikacji na serwerze
+self-hosting,self hosting|self hostować|self hostowany|self-hostować|self-hostowanym,concept,hostowanie usługi na własnym serwerze
 serverless,serwerlesowym|serwerles|serwerlesowy,concept,model chmury bez zarządzania serwerami
 microservice,mikroserwis|mikro serwis|mikroserwisowe|mikroserwisy|mikroserwisów,concept,mała niezależna usługa w architekturze mikroserwisów
 AI,ejaj|ej aj,acronym,artificial intelligence - sztuczna inteligencja
