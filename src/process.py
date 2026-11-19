@@ -41,6 +41,30 @@ def transcribe(
         transcribe_s=duration_s,
     )
 
+def build_hotwords(dictionary: pd.DataFrame, hidden_terms: list[str]) -> list[str]:
+    """Return dictionary terms in CSV order, without the hidden ones.
+
+    Terms are stripped; empty terms and duplicates are skipped.
+    Raises ValueError if a hidden term is not in the dictionary
+    (catches typos in hidden_terms.txt).
+    """
+
+    terms = dictionary["term"].str.strip().tolist()
+    hidden_set = set(hidden_terms)
+    missing = hidden_set - set(terms)
+    if missing:
+        raise ValueError(
+            f"Hidden terms not in dictionary: {sorted(missing)}"
+        )
+    seen = set()
+    hotwords = []
+
+    for term in terms:
+        if not term or term in hidden_set or term in seen:
+            continue
+        hotwords.append(term)
+        seen.add(term)
+    return hotwords
 
 # Every correction step only PROPOSES replacements (list[Replacement]).
 # apply_replacements is the only function that changes the text.
