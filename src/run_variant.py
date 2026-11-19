@@ -1,10 +1,10 @@
 from faster_whisper import WhisperModel
+from faster_whisper.tokenizer import Tokenizer
 
 from constants import KEY_PROJECT_PACKAGES, RECORDINGS_PATH
 from log_runs import AudioSplit, RunConfig, RunRepository
-from process import transcribe
+from process import ensure_hotwords_fit, transcribe
 from project_data import ProjectRepository
-
 
 def run_variant_first(
     config: RunConfig,
@@ -21,6 +21,14 @@ def run_variant_first(
         device=config.whisper.device,
         compute_type=config.whisper.compute_type,
     )
+
+    tokenizer = Tokenizer(
+        whisper_model.hf_tokenizer,
+        whisper_model.model.is_multilingual,
+        task="transcribe",
+        language=config.whisper.language,
+    )
+    ensure_hotwords_fit(config.whisper.hotwords, tokenizer, whisper_model.max_length)
 
     with run_repo.start_run(
         config_id=config_id, split=split, key_packages=key_packages
