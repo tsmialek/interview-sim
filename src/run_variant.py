@@ -1,27 +1,20 @@
-from typing import Iterator
-from pathlib import Path
 from faster_whisper import WhisperModel
 
-from constants import AUDIO_DIR, KEY_PROJECT_PACKAGES, RECORDINGS_PATH
+from constants import KEY_PROJECT_PACKAGES, RECORDINGS_PATH
 from log_runs import AudioSplit, RunConfig, RunRepository
 from process import transcribe
-from project_data import get_recordings_for_split
+from project_data import ProjectRepository
 
 
 def run_variant_first(
     config: RunConfig,
     split: AudioSplit,
-    repo: RunRepository,
-    recordings_csv: Path = RECORDINGS_PATH,
-    recordings_folder: Path = AUDIO_DIR,
+    run_repo: RunRepository,
+    project_repo: ProjectRepository,
     key_packages: list[str] = KEY_PROJECT_PACKAGES,
 ) -> str:
-    config_id = repo.save_config(config)
-    recordings = get_recordings_for_split(
-        recordings_csv=recordings_csv,
-        recordings_folder=recordings_folder,
-        split=split,
-    )
+    config_id = run_repo.save_config(config)
+    recordings = project_repo.get_recordings(split)
 
     whisper_model = WhisperModel(
         config.whisper.model,
@@ -29,7 +22,7 @@ def run_variant_first(
         compute_type=config.whisper.compute_type,
     )
 
-    with repo.start_run(
+    with run_repo.start_run(
         config_id=config_id, split=split, key_packages=key_packages
     ) as run:
         for rec in recordings:
