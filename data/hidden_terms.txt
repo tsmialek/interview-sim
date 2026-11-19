@@ -1,1 +1,10 @@
-Jenkins,Terraform,Redis,Azure,Scrum,Kanban,deploy,merge,REST,DevOps,
+Jenkins
+Terraform
+Redis
+Azure
+Scrum
+Kanban
+deploy
+merge
+REST
+DevOps
