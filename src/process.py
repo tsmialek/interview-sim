@@ -1,4 +1,5 @@
 from typing import Protocol
+from faster_whisper.tokenizer import Tokenizer
 
 from log_runs import (
     TranscribeArtifact,
@@ -65,6 +66,35 @@ def build_hotwords(dictionary: pd.DataFrame, hidden_terms: list[str]) -> list[st
         hotwords.append(term)
         seen.add(term)
     return hotwords
+
+def count_hotword_tokens(hotwords: list[str], tokenizer: Tokenizer) -> int:
+
+    """Return the number of tokens Whisper sees for `hotwords`.
+
+    Encodes the list exactly like faster-whisper: terms joined with spaces
+    (WhisperConfig.get_transcribe_args) and a leading space (get_prompt).
+    """
+
+    text = " " + " ".join(hotwords)
+    tokens = tokenizer.encode(text)
+    return len(tokens)
+
+def get_dropped_hotwords(hotwords: list[str], tokenizer: Tokenizer, max_length: int = 448) -> list[str]:
+
+    """Return the hotwords that faster-whisper cuts off from the prompt.
+
+    get_prompt keeps at most max_length // 2 - 1 hotword tokens (223 for
+    Whisper, whose max_length is 448). The first returned term may be cut
+    partially; all later ones are dropped entirely. An empty list means
+    the whole list fits.
+    """
+
+    limit = max_length // 2 - 1
+    for i in range(len(hotwords)):
+        prefix = hotwords[: i + 1]
+        if count_hotword_tokens(prefix, tokenizer) > limit:
+            return hotwords[i:]
+    return []
 
 # Every correction step only PROPOSES replacements (list[Replacement]).
 # apply_replacements is the only function that changes the text.
