@@ -42,31 +42,24 @@ def transcribe(
         transcribe_s=duration_s,
     )
 
-def build_hotwords(dictionary: pd.DataFrame, hidden_terms: list[str]) -> list[str]:
-    """Return dictionary terms in CSV order, without the hidden ones.
+def build_hotwords(dictionary: pd.DataFrame) -> list[str]:
+    """Return dictionary terms in CSV order, to be passed as Whisper hotwords.
 
-    Terms are stripped; empty terms and duplicates are skipped.
-    Raises ValueError if a hidden term is not in the dictionary
-    (catches typos in hidden_terms.txt).
+    Expects a dictionary with hidden terms already removed
+    (ProjectRepository.get_dictionary does that). Terms are stripped;
+    empty terms and duplicates are skipped.
     """
 
     terms = dictionary["term"].str.strip().tolist()
-    hidden_set = set(hidden_terms)
-    missing = hidden_set - set(terms)
-    if missing:
-        raise ValueError(
-            f"Hidden terms not in dictionary: {sorted(missing)}"
-        )
     seen = set()
     hotwords = []
 
     for term in terms:
-        if not term or term in hidden_set or term in seen:
+        if not term or term in seen:
             continue
         hotwords.append(term)
         seen.add(term)
     return hotwords
-
 
 def count_hotword_tokens(hotwords: list[str], tokenizer: Tokenizer) -> int:
     """Return the number of tokens Whisper sees for `hotwords`.
@@ -118,6 +111,7 @@ def ensure_hotwords_fit(
         raise ValueError(
             f"{len(dropped)} hotwords would be cut by faster-whisper: {dropped}"
         )
+
 
 
 # Every correction step only PROPOSES replacements (list[Replacement]).
