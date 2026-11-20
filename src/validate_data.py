@@ -123,6 +123,17 @@ def check_terms(path: Path, report: Report) -> dict[str, set[str]]:
     return forms
 
 
+def find_missing_hidden_terms(terms: list[str], hidden_terms: list[str]) -> list[str]:
+    """Return the hidden terms that are not in the dictionary, in file order.
+
+    Compares case-insensitively, like ProjectRepository.get_dictionary, so
+    `redis` hides `Redis`. Catches typos in hidden_terms.txt: such a term
+    would silently stay in the hotwords instead of being hidden.
+    """
+    known = {term.lower() for term in terms}
+    return [term for term in hidden_terms if term.lower() not in known]
+
+
 def check_manifest(path: Path, report: Report) -> dict[str, dict]:
     rows: dict[str, dict] = {}
     for where, row in read_csv(path, MANIFEST_COLUMNS, report):
