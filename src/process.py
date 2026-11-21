@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 from typing import Protocol
 
-import ollama
 import pandas as pd
 from faster_whisper import WhisperModel
 
@@ -14,7 +13,6 @@ from log_runs import (
     TranscribeArtifact,
     WhisperConfig,
 )
-from utils import get_sha256
 
 SLM_SYSTEM_PROMPT = """\
 Poprawiasz pojedyncze terminy IT w transkrypcji rozmowy rekrutacyjnej (mowa po polsku, nagrana i spisana automatycznie).
@@ -135,41 +133,20 @@ class SlmClient(Protocol):
     def chat(self, system: str, user: str, schema: dict) -> str: ...
 
 
-class OllamaSlmClient:
-    def __init__(self, config):
-        self.config = config
+def _sentence_around(text, start, end) -> str:
+    sentence_start = 0
+    sentence_end = len(text)
+    for i in range(start - 1, -1, -1):
+        if text[i] in ".!?" and text[i + 1] == " ":
+            sentence_start = i + 1
+            break
+    for i in range(end, len(text)):
+        if text[i] in ".!?":
+            if i + 1 == len(text) or text[i + 1] == " ":
+                sentence_end = i + 1
+                break
 
-    def chat(self, system: str, user: str, schema: dict) -> str:
-        response = ollama.chat(
-            model=self.config.model,
-            messages=[
-                {"role": "system", "content": system},
-                {
-                    "role": "user",
-                    "content": user,
-                },
-            ],
-            format=schema,
-            options={"temperature": self.config.temperature, "num_predict": 1000},
-        )
-        return response.message.content
-
-
-def make_slm_config(model: str, temperature: float) -> SlmConfig:
-    config_json_string = json.dumps(SLM_SCHEMA, sort_keys=True)
-
-    prompt_sha = get_sha256(config_json_string + SLM_SYSTEM_PROMPT, length=8)
-
-    digest = None
-    for m in ollama.list().models:
-        if m.model == model:
-            digest = m.digest
-    if digest is None:
-        raise ValueError("Model is not downloaded in Ollama")
-
-    return SlmConfig(
-        model=model, digest=digest, prompt_sha=prompt_sha, temperature=temperature
-    )
+    return text[sentence_start:sentence_end].strip()
 
 
 def find_slm_replacements(
@@ -195,10 +172,9 @@ def find_slm_replacements(
 
     proposals = []
     for candidate in candidates:
-        start = text.rfind(".", 0, candidate.position)
-        end = text.find(".", candidate.position)
-        stop = end + 1 if end != -1 else len(text)
-        sentence = text[start + 1 : stop].strip()
+        sentence = _sentence_around(
+            text, candidate.position, candidate.position + len(candidate.r_from)
+        )
 
         user = (
             f"Zdanie: {sentence}\n"
@@ -210,7 +186,7 @@ def find_slm_replacements(
             answer = json.loads(raw)
         except json.JSONDecodeError:
             continue
-        if (
+        if not isinstance(answer, dict) or (
             answer.get("status") != "podmiana"
             or not answer.get("r_to")
             or candidate.r_from == answer.get("r_to")
@@ -225,6 +201,7 @@ def find_slm_replacements(
                 source="slm",
             )
             proposals.append(proposal)
+
     return proposals
 
 

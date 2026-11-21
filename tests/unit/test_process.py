@@ -3,7 +3,12 @@ from types import SimpleNamespace
 import pytest
 
 from log_runs import Replacement, TranscribeArtifact
-from process import find_slm_replacements, transcribe, validate_slm_replacements
+from process import (
+    _sentence_around,
+    find_slm_replacements,
+    transcribe,
+    validate_slm_replacements,
+)
 from tests.helpers import make_fake_segment, make_word
 
 fake_info = SimpleNamespace(
@@ -177,3 +182,38 @@ def test_find_slm_skips_unchanged_fragment(default_slm_config):
     )
 
     assert result == []
+
+
+@pytest.mark.parametrize("raw", ["[]", '"tekst"', "5", "null"])
+def test_find_slm_skips_json_that_is_not_object(default_slm_config, raw):
+    client = FakeSlmClient(raw)
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+@pytest.mark.parametrize(
+    "text, fragment, expected",
+    [
+        ("Mam kota. Pisałem w grafkuelu.", "grafkuelu", "Pisałem w grafkuelu."),
+        (
+            "Pisałem w Next.js i w grafkuelu! Potem nic.",
+            "grafkuelu",
+            "Pisałem w Next.js i w grafkuelu!",
+        ),
+        ("Znam Node.js dobrze? Tak", "Node.js", "Znam Node.js dobrze?"),
+        ("Robiłem w grafkuelu", "grafkuelu", "Robiłem w grafkuelu"),
+        (
+            "Pisałem w grafkuelu i Kafce. Potem nic.",
+            "grafkuelu",
+            "Pisałem w grafkuelu i Kafce.",
+        ),
+    ],
+)
+def test_sentence_around(text, fragment, expected):
+    start = text.find(fragment)
+
+    assert _sentence_around(text, start, start + len(fragment)) == expected
