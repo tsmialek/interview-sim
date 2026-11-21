@@ -9,6 +9,7 @@ from validate_data import find_missing_hidden_terms
 
 HOTWORDS_SOURCE = "terms_it.csv term column minus hidden_terms.txt"
 
+
 def run_variant_first(
     config: RunConfig,
     split: AudioSplit,
@@ -53,7 +54,6 @@ def run_variant_second(
     run_repo: RunRepository,
     project_repo: ProjectRepository,
     key_packages: list[str] = KEY_PROJECT_PACKAGES,
-
 ) -> str:
     """Run variant 2: Whisper with the dictionary terms as hotwords, hidden terms left out.
 
