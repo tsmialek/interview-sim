@@ -1,10 +1,15 @@
 from types import SimpleNamespace
 
-from process import transcribe
-from log_runs import TranscribeArtifact
+import pytest
 
-from tests.helpers import make_fake_segment
-from tests.helpers import make_word
+from log_runs import Replacement, TranscribeArtifact
+from process import (
+    _sentence_around,
+    find_slm_replacements,
+    transcribe,
+    validate_slm_replacements,
+)
+from tests.helpers import make_fake_segment, make_word
 
 fake_info = SimpleNamespace(
     language="pl",
@@ -36,3 +41,179 @@ def test_transcribe_returns_proper_artifact(default_whisper_config, mocker):
         transcribe_s=20.1,
     ).model_dump(exclude={"transcribe_s"})
     assert result.transcribe_s > 0
+
+
+def test_validate_accepts_correct_proposal():
+    text = "pracowałem w dżirze i githabie"
+    prop = Replacement(
+        r_from="dżirze", r_to="Jirze", base_term="Jira", position=13, source="slm"
+    )
+
+    accepted, rejected = validate_slm_replacements(text, [prop])
+
+    assert accepted == [prop]
+    assert rejected == []
+
+
+def test_validate_badprefix_incorrect_proposal():
+    text = "pracowałem w dżirze i githabie"
+    prop = Replacement(
+        r_from="dżirze", r_to="dżirze", base_term="Jira", position=13, source="slm"
+    )
+
+    accepted, rejected = validate_slm_replacements(text, [prop])
+
+    assert accepted == []
+    assert rejected == [prop]
+
+
+def test_validate_badposition_incorrect_proposal():
+    text = "pracowałem w dżirze i githabie"
+    prop = Replacement(
+        r_from="dżirze", r_to="Jirze", base_term="Jira", position=17, source="slm"
+    )
+
+    accepted, rejected = validate_slm_replacements(text, [prop])
+
+    assert accepted == []
+    assert rejected == [prop]
+
+
+def test_validate_accepts_short_term():
+    text = "wdrożyłem na ejdablju es"
+    prop = Replacement(
+        r_from="ejdablju es", r_to="AWS-ie", base_term="AWS", position=13, source="slm"
+    )
+
+    accepted, rejected = validate_slm_replacements(text, [prop])
+
+    assert accepted == [prop]
+    assert rejected == []
+
+
+class FakeSlmClient:
+    def __init__(self, response):
+        self.response = response
+
+    def chat(self, system, user, schema):
+        return self.response
+
+
+SLM_TEXT = "Potem robiłem API w grafkuelu."
+SLM_CANDIDATE = Replacement(
+    r_from="grafkuelu",
+    r_to="GraphQL",
+    base_term="GraphQL",
+    position=20,
+    source="dictionary",
+)
+
+
+def test_find_slm_returns_inflected_replacement(default_slm_config):
+    client = FakeSlmClient('{"status": "podmiana", "r_to": "GraphQL-u"}')
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == [
+        Replacement(
+            r_from="grafkuelu",
+            r_to="GraphQL-u",
+            base_term="GraphQL",
+            position=20,
+            source="slm",
+        )
+    ]
+
+
+def test_find_slm_skips_when_model_does_not_know(default_slm_config):
+    client = FakeSlmClient('{"status": "nie_wiem", "r_to": ""}')
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+def test_find_slm_skips_truncated_json(default_slm_config):
+    client = FakeSlmClient('{"status": "podm')
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+def test_find_slm_without_candidates_is_not_implemented(default_slm_config):
+    client = FakeSlmClient('{"status": "podmiana", "r_to": "x"}')
+
+    with pytest.raises(NotImplementedError):
+        find_slm_replacements(SLM_TEXT, None, default_slm_config, client)
+
+
+def test_find_slm_skips_json_without_keys(default_slm_config):
+    client = FakeSlmClient("{}")
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+def test_find_slm_skips_replacement_without_r_to(default_slm_config):
+    client = FakeSlmClient('{"status": "podmiana"}')
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+def test_find_slm_skips_unchanged_fragment(default_slm_config):
+    client = FakeSlmClient('{"status": "podmiana", "r_to": "grafkuelu"}')
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+@pytest.mark.parametrize("raw", ["[]", '"tekst"', "5", "null"])
+def test_find_slm_skips_json_that_is_not_object(default_slm_config, raw):
+    client = FakeSlmClient(raw)
+
+    result = find_slm_replacements(
+        SLM_TEXT, [SLM_CANDIDATE], default_slm_config, client
+    )
+
+    assert result == []
+
+
+@pytest.mark.parametrize(
+    "text, fragment, expected",
+    [
+        ("Mam kota. Pisałem w grafkuelu.", "grafkuelu", "Pisałem w grafkuelu."),
+        (
+            "Pisałem w Next.js i w grafkuelu! Potem nic.",
+            "grafkuelu",
+            "Pisałem w Next.js i w grafkuelu!",
+        ),
+        ("Znam Node.js dobrze? Tak", "Node.js", "Znam Node.js dobrze?"),
+        ("Robiłem w grafkuelu", "grafkuelu", "Robiłem w grafkuelu"),
+        (
+            "Pisałem w grafkuelu i Kafce. Potem nic.",
+            "grafkuelu",
+            "Pisałem w grafkuelu i Kafce.",
+        ),
+    ],
+)
+def test_sentence_around(text, fragment, expected):
+    start = text.find(fragment)
+
+    assert _sentence_around(text, start, start + len(fragment)) == expected
