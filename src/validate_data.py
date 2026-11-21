@@ -1,4 +1,4 @@
-"""Validate the D1 dataset: term dictionary, manifest, transcripts and audio.
+"""Validate the D1 dataset: term dictionary, hidden terms, manifest, transcripts and audio.
 
 Usage (from the repository root):
     python src/validate_data.py
@@ -121,6 +121,30 @@ def check_terms(path: Path, report: Report) -> dict[str, set[str]]:
                 report.warn(where, f"alias '{alias}' is also an alias of '{owner}'")
         forms[term] = {term.lower(), *aliases}
     return forms
+
+
+def find_missing_hidden_terms(terms: list[str], hidden_terms: list[str]) -> list[str]:
+    """Return the hidden terms that are not in the dictionary, in file order.
+
+    Compares case-insensitively, like ProjectRepository.get_dictionary, so
+    `redis` hides `Redis`. Catches typos in hidden_terms.txt: such a term
+    would silently stay in the hotwords instead of being hidden.
+    """
+    known = {term.lower() for term in terms}
+    return [term for term in hidden_terms if term.lower() not in known]
+
+
+def read_hidden_terms(path: Path, report: Report) -> list[str]:
+    """Return the terms from hidden_terms.txt, one per line, empty lines skipped.
+
+    Parses the file exactly like ProjectRepository.get_hidden_terms, so the hook
+    checks the same terms that a run hides.
+    """
+    if not path.exists():
+        report.error(path.name, "file not found")
+        return []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return [line.strip() for line in lines if line.strip()]
 
 
 def check_manifest(path: Path, report: Report) -> dict[str, dict]:
@@ -256,6 +280,12 @@ def main(argv: list[str] | None = None) -> int:
     report = Report()
     data_dir = args.data_dir
     forms = check_terms(data_dir / "terms_it.csv", report)
+    hidden_terms = read_hidden_terms(data_dir / "hidden_terms.txt", report)
+    if forms:  # without a dictionary every hidden term would be reported again
+        for term in find_missing_hidden_terms(list(forms), hidden_terms):
+            hint = difflib.get_close_matches(term, forms, n=1)
+            suffix = f", did you mean '{hint[0]}'?" if hint else ""
+            report.error("hidden_terms.txt", f"'{term}' is not a term in terms_it.csv{suffix}")
     manifest = check_manifest(data_dir / "recordings.csv", report)
 
     patterns = {

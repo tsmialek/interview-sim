@@ -1,10 +1,10 @@
 Jenkins
-Terraform
+Microsoft Teams
 Redis
 Azure
 Scrum
-Kanban
+sprint
 deploy
 merge
-REST
-DevOps
+POC
+API

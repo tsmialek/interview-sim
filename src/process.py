@@ -1,4 +1,5 @@
 from typing import Protocol
+from faster_whisper.tokenizer import Tokenizer
 
 from log_runs import (
     TranscribeArtifact,
@@ -40,6 +41,77 @@ def transcribe(
         words=words,
         transcribe_s=duration_s,
     )
+
+def build_hotwords(dictionary: pd.DataFrame) -> list[str]:
+    """Return dictionary terms in CSV order, to be passed as Whisper hotwords.
+
+    Expects a dictionary with hidden terms already removed
+    (ProjectRepository.get_dictionary does that). Terms are stripped;
+    empty terms and duplicates are skipped.
+    """
+
+    terms = dictionary["term"].str.strip().tolist()
+    seen = set()
+    hotwords = []
+
+    for term in terms:
+        if not term or term in seen:
+            continue
+        hotwords.append(term)
+        seen.add(term)
+    return hotwords
+
+def count_hotword_tokens(hotwords: list[str], tokenizer: Tokenizer) -> int:
+    """Return the number of tokens Whisper sees for `hotwords`.
+
+    Encodes the list exactly like faster-whisper: terms joined with spaces
+    (WhisperConfig.get_transcribe_args) and a leading space (get_prompt).
+    """
+    text = " " + " ".join(hotwords)
+    tokens = tokenizer.encode(text)
+    return len(tokens)
+
+
+def get_dropped_hotwords(
+    hotwords: list[str],
+    tokenizer: Tokenizer,
+    max_length: int = 448,
+) -> list[str]:
+    """Return the hotwords that faster-whisper cuts off from the prompt.
+
+    get_prompt keeps at most max_length // 2 - 1 hotword tokens (223 for
+    Whisper, whose max_length is 448). The first returned term may be cut
+    partially; all later ones are dropped entirely. An empty list means
+    the whole list fits.
+    """
+    limit = max_length // 2 - 1
+    for i in range(len(hotwords)):
+        prefix = hotwords[: i + 1]
+        if count_hotword_tokens(prefix, tokenizer) > limit:
+            return hotwords[i:]
+    return []
+
+
+def ensure_hotwords_fit(
+    hotwords: list[str] | str | None,
+    tokenizer: Tokenizer,
+    max_length: int = 448,
+) -> None:
+    """Raise ValueError if faster-whisper would cut any hotwords from the prompt.
+
+    None or empty hotwords pass. A str is checked as one block, so the error
+    says that something is cut, not which terms.
+    """
+    if not hotwords:
+        return
+    if isinstance(hotwords, str):
+        hotwords = [hotwords]
+    dropped = get_dropped_hotwords(hotwords, tokenizer, max_length)
+    if dropped:
+        raise ValueError(
+            f"{len(dropped)} hotwords would be cut by faster-whisper: {dropped}"
+        )
+
 
 
 # Every correction step only PROPOSES replacements (list[Replacement]).
