@@ -14,4 +14,5 @@ KEY_PROJECT_PACKAGES = [
     "av",
     "ctranslate2",
     "pydantic",
+    "rapidfuzz",
 ]
