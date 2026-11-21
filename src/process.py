@@ -178,8 +178,45 @@ def validate_slm_replacements(
 def apply_replacements(text: str, replacements: list[Replacement]) -> str:
     """Return `text` with every replacement applied.
 
-    Everything outside the replaced fragments must stay byte-for-byte unchanged.
-    Apply from the highest position down, so earlier positions stay valid.
-    Overlapping replacements are a conflict: decide and document the rule.
+    Everything outside the replaced fragments stays byte-for-byte unchanged.
+    Replacements are applied from the highest position down, so earlier
+    positions stay valid; the order of the input list does not matter.
+
+    Raises ValueError before applying anything if `r_from` is not found
+    in `text` at `position`, or if two replacements overlap (touching ones
+    are fine). Resolving conflicts belongs to the step that proposes the
+    replacements, so it can report the dropped ones in ReplaceArtifact.rejected.
     """
-    raise NotImplementedError
+
+    ordered = sorted(replacements, key=lambda r: r.position)
+
+    for r in ordered:
+        end = r.position + len(r.r_from)
+
+        if r.position < 0 or end > len(text):
+            raise ValueError(
+                f"Invalid replacement position: {r.position}"
+            )
+
+        if text[r.position:end] != r.r_from:
+            raise ValueError(
+                f"Expected {r.r_from!r} at position {r.position}"
+            )
+
+    for prev, nxt in zip(ordered, ordered[1:]):
+        prev_end = prev.position + len(prev.r_from)
+
+        if nxt.position < prev_end:
+            raise ValueError(
+                f"Overlapping replacements at "
+                f"{prev.position} and {nxt.position}"
+            )
+
+    for r in reversed(ordered):
+        start = r.position
+        end = start + len(r.r_from)
+
+        text = text[:start] + r.r_to + text[end:]
+
+    return text
+
