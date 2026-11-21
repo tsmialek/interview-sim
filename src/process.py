@@ -1,5 +1,8 @@
 from typing import Protocol
 from faster_whisper.tokenizer import Tokenizer
+import re
+from rapidfuzz import fuzz
+from rapidfuzz.process import extractOne
 
 from log_runs import (
     TranscribeArtifact,
@@ -118,17 +121,112 @@ def ensure_hotwords_fit(
 # apply_replacements is the only function that changes the text.
 # None of these functions read files or know about run_id / RunRepository.
 
+WORD_PATTERN = r"\w+(?:[-'/]\w+)*"
+
+
+def build_alias_index(
+    dictionary: pd.DataFrame,
+) -> dict[int, tuple[list[str], list[str]]]:
+    """Group lowercased aliases by word count, with their term at the same index.
+
+    Words are counted with WORD_PATTERN, the same way find_dictionary_replacements
+    splits the text, so "e-commerce'owy" counts as one word.
+    """
+    index = {}
+
+    for term, aliases in zip(dictionary["term"], dictionary["aliases"]):
+        for alias in aliases:
+            alias = " ".join(alias.lower().split())
+
+            n = len(re.findall(WORD_PATTERN, alias))
+
+            if n == 0:
+                continue
+
+            if n not in index:
+                index[n] = ([], [])
+
+            index[n][0].append(alias)
+            index[n][1].append(term)
+
+    return index
+
+
 def find_dictionary_replacements(
     text: str,
     dictionary: pd.DataFrame,
     config: DictionaryConfig,
 ) -> list[Replacement]:
-    """Variant 3 Find misrecognised dictionary terms in `text`.
+    """Variant 3: find misrecognised dictionary terms in `text`.
 
     `dictionary`: ProjectRepository.get_dictionary(), hidden terms already removed.
-    Returns replacements with source="dictionary"; `position` refers to `text`.
+    Returns replacements with source="dictionary", sorted by `position`, which
+    refers to `text`. r_to and base_term are the canonical term, not inflected.
+
+    Rules:
+    - Only whole words (WORD_PATTERN) are compared, so "dotnet" inside
+      "dotnetowy" is never matched; the whole word "dotnetowy" is compared
+      instead (fuzz.ratio 80 against "dotnet", below a threshold of 85).
+    - Windows of up to 4 words are tried, longest first. Words matched once
+      are not matched again, so the replacements never overlap.
+    - A window joins words separated by whitespace only, never punctuation.
+    - Similarity is fuzz.ratio (0-100) against aliases with the same number
+      of words; matches below config.rapidfuzz_threshold are ignored.
+    - A fragment that already starts with its term ("Dockera", "pull requesta")
+      is left unchanged, and its words stay taken.
     """
-    raise NotImplementedError
+    index = build_alias_index(dictionary)
+    words = [
+        (match.start(), match.end())
+        for match in re.finditer(WORD_PATTERN, text)
+    ]
+    used = [False] * len(words)
+    replacements = []
+
+    for n in sorted(index, reverse=True):
+        aliases, terms = index[n]
+        for i in range(len(words) - n + 1):
+            window = words[i : i + n]
+            if any(used[i : i + n]):
+                continue
+
+            if any(
+                not text[words[j][1] : words[j + 1][0]].isspace()
+                for j in range(i, i + n - 1)
+            ):
+                continue
+
+            start = window[0][0]
+            end = window[-1][1]
+            r_from = text[start:end]
+            candidate = " ".join(r_from.lower().split())
+
+            match = extractOne(
+                candidate,
+                aliases,
+                scorer=fuzz.ratio,
+                score_cutoff=config.rapidfuzz_threshold,
+            )
+            if match is None:
+                continue
+
+            term = terms[match[2]]
+            used[i : i + n] = [True] * n
+
+            if candidate.startswith(term.lower()):
+                continue
+
+            replacements.append(
+                Replacement(
+                    r_from=r_from,
+                    r_to=term,
+                    base_term=term,
+                    position=start,
+                    source="dictionary",
+                )
+            )
+
+    return sorted(replacements, key=lambda r: r.position)
 
 
 class SlmClient(Protocol):
@@ -178,8 +276,45 @@ def validate_slm_replacements(
 def apply_replacements(text: str, replacements: list[Replacement]) -> str:
     """Return `text` with every replacement applied.
 
-    Everything outside the replaced fragments must stay byte-for-byte unchanged.
-    Apply from the highest position down, so earlier positions stay valid.
-    Overlapping replacements are a conflict: decide and document the rule.
+    Everything outside the replaced fragments stays byte-for-byte unchanged.
+    Replacements are applied from the highest position down, so earlier
+    positions stay valid; the order of the input list does not matter.
+
+    Raises ValueError before applying anything if `r_from` is not found
+    in `text` at `position`, or if two replacements overlap (touching ones
+    are fine). Resolving conflicts belongs to the step that proposes the
+    replacements, so it can report the dropped ones in ReplaceArtifact.rejected.
     """
-    raise NotImplementedError
+
+    ordered = sorted(replacements, key=lambda r: r.position)
+
+    for r in ordered:
+        end = r.position + len(r.r_from)
+
+        if r.position < 0 or end > len(text):
+            raise ValueError(
+                f"Invalid replacement position: {r.position}"
+            )
+
+        if text[r.position:end] != r.r_from:
+            raise ValueError(
+                f"Expected {r.r_from!r} at position {r.position}"
+            )
+
+    for prev, nxt in zip(ordered, ordered[1:]):
+        prev_end = prev.position + len(prev.r_from)
+
+        if nxt.position < prev_end:
+            raise ValueError(
+                f"Overlapping replacements at "
+                f"{prev.position} and {nxt.position}"
+            )
+
+    for r in reversed(ordered):
+        start = r.position
+        end = start + len(r.r_from)
+
+        text = text[:start] + r.r_to + text[end:]
+
+    return text
+
