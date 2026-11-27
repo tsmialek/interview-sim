@@ -1,0 +1,50 @@
+no i całe logi lądowały w {Kibanie|Kibana}, a alerty szły nam na {slaka|Slack}
+w sumie {API|API} wystawialiśmy w {grafkuelu|GraphQL}, bo {frontend|frontend} potrzebował bardzo różnych danych
+każdy {PR|pull request} musiał przejść {code review|code review} u dwóch osób, no taka była zasada
+kolejkę zadań mieliśmy na {rabbitmq|RabbitMQ}, a zadania w tle obsługiwało {seleri|Celery}
+to, to był mój pierwszy projekt w {Django|Django}, wcześniej pisałem tylko proste skrypty w {Pythonie|Python}
+metryki zbieraliśmy {Prometheusem|Prometheus} i potem oglądaliśmy je w {Grafanie|Grafana}
+jak ruch urósł, to postawiliśmy {load balanser|load balancer} przed trzema serwerami
+no i baza była na {mongodb|MongoDB}, ale jakby po roku przenieśliśmy wszystko do {PostgreSQL-a|PostgreSQL}
+testy w przeglądarce pisałem najpierw w {Cypressie|Cypress}, a potem przeszliśmy na {Playwrighta|Playwright}
+wiesz, ja najbardziej lubię {typescripta|TypeScript}, bo po prostu łapie błędy, zanim cokolwiek odpalisz
+obrazy budowaliśmy w {dockerze|Docker}, a na {kubernetesa|Kubernetes} wrzucaliśmy je {helmem|Helm}
+logowanie było przez {oaut|OAuth}, a potem {frontend|frontend} trzymał {JWT|JWT} w pamięci
+no i tam był taki problem, że przy dużym ruchu robił się {deadlock|deadlock} w bazie
+czat działał na {WebSocketach|WebSocket}, bo zwykłe odpytywanie co sekundę zabijało serwer
+dokumentację {API|API} generowaliśmy ze {Swaggera|Swagger}, żeby nikt nie musiał jej pisać ręcznie
+komponenty najpierw robiliśmy w {storybooku|Storybook}, a dopiero potem wpinaliśmy w aplikację
+u nas zadania są w {Jirze|Jira}, a dokumentacja w {Confluence|Confluence}, standard w sumie
+ja w {Vue|Vue} pisałem dwa lata, a teraz od pół roku siedzę w {Reakcie|React}
+analitycy wrzucali dane do {BigQuery|BigQuery}, a my tylko pilnowaliśmy, żeby {pipeline|pipeline} się nie wywalał
+błędy z produkcji wpadały do {sentri|Sentry} i tam od razu było widać, który {komit|commit} to zepsuł
+pliki użytkowników trzymaliśmy na {S3|S3}, a przed tym stał jeszcze {CloudFront|CloudFront}
+modele trenowałem w {PyTorchu|PyTorch}, ale dane to głównie obrabiałem w {pandasie|pandas}
+w sumie najwięcej nauczyłem się przy {refaktoringu|refactoring} starego modułu w {javie|Java}
+no to było {mvp|MVP}, więc postawiliśmy wszystko na {Firebase|Firebase} i nie bawiliśmy się w serwery
+serwis od płatności był napisany w {Go|Go}, bo potrzebowaliśmy dużej wydajności
+jak wchodziłem do zespołu, to {beklog|backlog} miał chyba ze trzysta zadań, no masakra
+zapytania szły przez {ORM-a|ORM}, ale te cięższe pisaliśmy ręcznie w {SQL-u|SQL}
+ja w ogóle zaczynałem od {fluttera|Flutter}, robiłem aplikacje mobilne dla małej firmy
+konfigurację serwerów trzymaliśmy w {ansible|Ansible}, więc postawienie nowej maszyny to było pięć minut
+wiesz, na każdym {daily|daily} ktoś mówił, że ma {blockera|blocker} na tym samym zadaniu
+przy dużych tabelach zrobiliśmy {szarding|sharding} po identyfikatorze klienta i to, to bardzo pomogło
+stan aplikacji trzymaliśmy w {reduksie|Redux}, chociaż dzisiaj to bym już tego nie robił
+no i jak coś padło w nocy, to {Datadog|Datadog} budził dyżurnego telefonem
+style pisaliśmy w {tailwindzie|Tailwind}, bo nikt nie chciał utrzymywać osobnych plików
+funkcje w tle odpalaliśmy na {Lambdzie|AWS Lambda}, płaciło się tylko za wywołania
+przed każdym wydaniem {QA|QA} przeklikiwało wszystko, a potem jeszcze puszczaliśmy testy w {selenium|Selenium}
+kod sprawdzał nam {sonarqube|SonarQube} i jak wykrył coś poważnego, to {pipeline|pipeline} stawał
+ja ostatnio dużo piszę w {Kotlinie|Kotlin}, a wcześniej to był {C#|C#} i {dotnet|.NET}
+no i jak byłem mały, to dziadek, który był dokerem, zabierał mnie do portu na całe dnie
+w niedzielę poszliśmy na brancz, a potem jeszcze do kina na sequel tego horroru
+w zoo najbardziej zapamiętałem pytona, leżał zwinięty i w ogóle się nie ruszał
+przez dwa lata działałem w komitecie rodzicielskim, więc organizowanie ludzi to ja znam
+no moja pierwsza reakcja była taka, że się zaśmiałem, dopiero potem dotarło, co się stało
+musiałem iść do POK-u w banku, bo zablokowali mi kartę akurat przed wyjazdem
+po pracy siedzę w grafice komputerowej, a w weekendy chodzę po górskich szlakach
+to było jak sen na jawie, stałem na scenie i, i nie wierzyłem, że to się dzieje
+remont łazienki to była masakra, połowa kafli popękała nam przy cięciu
+na ostatnim kilometrze zrobiłem sprint i wyprzedziłem jeszcze dwie osoby
+połowę wypłaty odkładam, a rest wydaję na podróże, tak mniej więcej
+mama zrobiła mi na drutach ażurowy sweter i noszę go chyba od dziesięciu lat
